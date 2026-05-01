@@ -30,3 +30,9 @@ src/rs50_thermal/wifi_credentials.h
 
 # Local backups
 .backup/
+
+# Scripts pessoais de setup local (não versionar)
+setup-repo.ps1
+update-repo.ps1
+create-hardware-structure.ps1
+create-symbols-*.ps1
