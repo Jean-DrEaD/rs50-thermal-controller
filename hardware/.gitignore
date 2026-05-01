@@ -1,0 +1,26 @@
+# KiCad backup files
+*-backups/
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*.kicad_prl
+*.lck
+
+# Auto-generated cache
+fp-info-cache
+sym-lib-table.bak
+fp-lib-table.bak
+
+# Production output (regenerated on each release)
+production/gerber/
+production/drill/
+production/*.zip
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.swp
+*~
