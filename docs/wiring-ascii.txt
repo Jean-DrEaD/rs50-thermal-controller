@@ -1,19 +1,21 @@
 ═══════════════════════════════════════════════════════════════════════════
   RS50 THERMAL CONTROLLER — WIRING DIAGRAM (TEXT VERSION)
-  Version: 3.3.0
+  Version: 3.3.1
 ═══════════════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          POWER DISTRIBUTION                              │
 └─────────────────────────────────────────────────────────────────────────┘
 
-  XDrive Mini PSU ──┬── 24V ──► ODESC FFBeast (motor driver)
-   (24V/cabos       │
-    1.5mm² fios)    ├── 24V ──► Songle Relay COM (NC contact)
+  XDrive Mini PSU ──┬── 24V ──► Songle Relay COM
+   (24V/cabos       │            └─► NC ──► ODESC FFBeast (motor driver)
+    1.5mm² fios)    │
+                    ├── 24V ──► LM2596 #1 ─► 12V ──┬── Fan 12V (via IRLZ44N)
+                    │                               │
+                    │                               └── LM2596 #2 ─► 5V ──► ESP32-S3-Zero VBUS
+                    │                                  (ou Mini-360, opcional)
                     │
-                    └── 24V ──► LM2596 ─► 12V ──┬── Fan 12V (via MOSFET)
-                                                 │
-                                                 └── Mini-360 ─► 5V ──► ESP32-S3-Zero VBUS
+                    └── 24V ──► Bobina do relé (A1)
 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          ESP32-S3-ZERO PINOUT                            │
@@ -22,13 +24,13 @@
                        ┌──────────────────────┐
                        │   ESP32-S3-Zero      │
                        │                      │
-       NTC ─────────►  │ GPIO 1 (ADC1_CH0)    │
+       NTC ─────────►  │ GPIO 1  (ADC1_CH0)   │
                        │                      │
-       Fan PWM ◄─────  │ GPIO 2               │ ──► IRLZ44N Gate (220Ω)
+       Fan PWM ◄─────  │ GPIO 5               │ ──► IRLZ44N #1 Gate (220Ω)
                        │                      │
-       WS2812 ◄──────  │ GPIO 3               │
+       Relé ◄────────  │ GPIO 4               │ ──► IRLZ44N #2 Gate (220Ω)
                        │                      │
-       Relay ◄───────  │ GPIO 4               │ ──► 2N2222 Base (1kΩ)
+       WS2812 ◄──────  │ GPIO 21              │
                        │                      │
                        │ GND ─────── GND      │
                        │ 5V  ─────── VBUS     │
@@ -47,36 +49,36 @@
                        └──┬──┘
                           │
                          GND
-                          │
-                       (100nF cap between GPIO 1 and GND for noise)
+
+       (100nF cerâmico entre GPIO 1 e GND para filtrar ruído)
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          FAN PWM (12V)                                   │
+│                       FAN PWM (12V) — IRLZ44N #1                         │
 └─────────────────────────────────────────────────────────────────────────┘
 
-                    12V (from LM2596)
+                    12V (from LM2596 #1)
                           │
                           ├────────► Fan VCC (red wire)
                           │
                        ┌──┴──┐
-                       │ FAN │  12V PWM 80mm
+                       │ FAN │  12V PWM 120mm 4-pin
                        │     │
                        └──┬──┘
                           │
-                          ├────────► IRLZ44N Drain
+                          ├────────► IRLZ44N #1 Drain
                           │
                        ┌──┴────────┐
-                       │ IRLZ44N   │  N-MOSFET
+                       │ IRLZ44N   │  N-MOSFET (logic-level)
                        │           │
-                       │ G ──[220Ω]──► GPIO 2 (PWM)
-                       │           │
+                       │ G ──[220Ω]──► GPIO 5 (PWM 25kHz)
+                       │  │        │
+                       │ [10kΩ]    │  ◄── pull-down Gate→GND
+                       │  │        │
                        │ S ───────────► GND
                        └───────────┘
-                          │
-                          └─[10kΩ]─► GND  (pull-down do gate)
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                       SAFETY RELAY (FAIL-SAFE NC)                        │
+│                  SAFETY RELAY (FAIL-SAFE NC) — IRLZ44N #2                │
 └─────────────────────────────────────────────────────────────────────────┘
 
    ⚠️ ATENÇÃO: Use contato NORMALMENTE FECHADO (NC)!
@@ -87,48 +89,49 @@
                      │
                      ▼
                 ┌─────────┐
-                │ Relé    │ COM ───► ODESC AC IN (motor power)
+                │ Relé    │ COM ───► (entrada de 24V da fonte)
                 │ Songle  │
-                │ SLA-24V │ NC  ───► 24V (normalmente conectado)
+                │ SLA-24V │ NC  ───► ODESC AC IN (motor power)
                 │   30A   │
                 │         │ NO  ───► (não usado)
                 └────┬────┘
                      │
-                     │ Coil 24V
+                     │ Bobina 24V
+                     │   A1 = +24V
+                     │   A2 = Drain do IRLZ44N #2
                      ▼
-                  [1N4007]    ◄── Diodo flyback (essencial!)
+                  [1N4007]    ◄── Diodo flyback antiparalelo (essencial!)
+                     │             K → A1 (+24V) | A → A2
                      │
-                  ┌──┴──┐
-                  │2N2222│ NPN driver
-                  │ NPN │
-                  └──┬──┘
-                     │
-                  [1kΩ]
-                     │
-                   GPIO 4 ───── (pull-down 10kΩ para GND)
-                              ◄── Pull-down evita acionamento durante boot
+                  ┌──┴────────┐
+                  │ IRLZ44N   │  N-MOSFET (logic-level)
+                  │           │
+                  │ G ──[220Ω]──► GPIO 4
+                  │  │        │
+                  │ [10kΩ]    │  ◄── pull-down Gate→GND
+                  │  │        │     (evita acionamento durante boot)
+                  │ S ───────────► GND
+                  └───────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          WS2812 LEDs                                     │
 └─────────────────────────────────────────────────────────────────────────┘
 
-       5V ────────► WS2812 VCC (red)
-       GND ───────► WS2812 GND (black)
-       GPIO 3 ────► WS2812 DIN (data)
+       5V ─────────► WS2812 VCC (red)
+       GND ────────► WS2812 GND (black)
+       GPIO 21 ────► WS2812 DIN (data)
 
        LED_COUNT configurável: 1, 3, ou 5+ LEDs
-       Configurar em config.h:
+       Configurar em config.h (modo selecionado automaticamente):
          #define LED_COUNT  3
-         #define LED_MODE   MODE_BAR
 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                       CABLE SPECIFICATIONS                               │
 └─────────────────────────────────────────────────────────────────────────┘
 
-  ► Cabos 24V (XDrive Mini → ODESC):
+  ► Cabos 24V (XDrive Mini → Relé → ODESC):
     - Diâmetro externo: 3mm
-    - Bitola fios: 1.5mm² (~16 AWG)
-    - Comprimento: original do kit
+    - Bitola fios: 1.5mm² (~16 AWG) mínimo
     - Tipo: 2 condutores (V+ e GND)
 
   ► Cabos NTC ao MCU:
@@ -138,10 +141,10 @@
 
   ► Cabos LED WS2812:
     - Bitola: 0.5mm² (3 condutores: VCC, GND, DIN)
-    - Comprimento: <50cm (sinal RTC pode degradar)
+    - Comprimento: <50cm (sinal pode degradar)
 
   ► Cabos relé:
-    - Bobina: 0.5mm² OK (corrente baixa)
+    - Bobina: 0.5mm² OK (corrente baixa, ~30mA)
     - Contatos NC/COM: 2.5mm² mínimo (corrente do motor!)
 
 ═══════════════════════════════════════════════════════════════════════════

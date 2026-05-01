@@ -118,8 +118,8 @@ Volantes **Direct Drive** com motores hoverboard 15Nm geram **calor extremo** du
                               │   Zero    │      │
                               │           │      │
                               │  GPIO 1 ◄─┼──────┴── NTC 100K
-                              │  GPIO 2 ──┼─► PWM Fan
-                              │  GPIO 3 ──┼─► WS2812
+                              │  GPIO 5 ──┼─► PWM Fan
+                              │  GPIO 21 ─┼─► WS2812
                               │  GPIO 4 ──┼─► Relé
                               └───────────┘
 ```
@@ -147,7 +147,7 @@ Volantes **Direct Drive** com motores hoverboard 15Nm geram **calor extremo** du
 | 1 | **Diodo flyback** | 1N4007 (proteção do relé) | R$ 0.50 |
 | - | **Conectores** | JST-XH, terminais ring | R$ 10 |
 | - | **Caixa** | Impressa 3D ou PVC | R$ 10 |
-| | | **Total estimado** | **~R$ 130** |
+| | | **Total estimado** | **~R$ 145** |
 
 📋 **[BOM completa em CSV](hardware/bom.csv)**
 
@@ -219,11 +219,11 @@ Edite **`src/rs50_thermal/config.h`** antes de gravar:
 
 // ─── LEDs ──────────────────────────────────────────
 #define LED_COUNT         3                    // ← 1, 3, 5+ LEDs
-#define LED_MODE          MODE_BAR             // ← MODE_SINGLE / MODE_BAR / MODE_THERMOMETER
+// LED_MODE selecionado automaticamente por LED_COUNT (1=SINGLE, 3-4=BAR, 5+=THERMOMETER)
 
 // ─── CALIBRAÇÃO TÉRMICA ───────────────────────────
 #define THERMAL_OFFSET    9.0f                 // ← ajuste após calibração (ver guide)
-#define LEAD_TIME_S       70                   // ← antecipação em segundos
+#define LEAD_TIME_S       70.0f                // ← antecipação em segundos
 #define EMA_ALPHA         0.18f                // ← filtro de ruído
 
 // ─── LIMITES (NÃO ALTERE sem motivo!) ─────────────
@@ -442,7 +442,6 @@ Se este projeto te ajudou:
 ## 👥 Comunidade
 
 - 💬 **Discord FFBeast**: [#projects](https://discord.gg/ffbeast)
-- 📧 **Email**: jean.dread@exemplo.com
 - 🐦 **Reddit**: [r/simracing](https://reddit.com/r/simracing)
 
 ---
