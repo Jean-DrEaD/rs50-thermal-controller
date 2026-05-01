@@ -1,0 +1,29 @@
+# Arduino build output
+build/
+*.bin
+*.elf
+*.hex
+*.map
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Backup files
+*.bak
+*.tmp
+*~
+
+# Sensitive config (NUNCA commitar credenciais reais!)
+src/rs50_thermal/secrets.h
+src/rs50_thermal/wifi_credentials.h

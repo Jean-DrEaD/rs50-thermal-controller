@@ -1,0 +1,16 @@
+Componente,Especificacao,Quantidade,Preco_BRL,Onde_Comprar
+Rele Songle,SLA-24VDC-SL-C 30A SPDT,1,12,AliExpress/Mercado Livre
+MOSFET IRLZ44N,N-channel logic-level TO-220,1,4,AliExpress
+Diodo 1N4007,Retificador 1A 1000V,1,0.30,Qualquer eletronica
+Resistor 220R,1/4W 5%,1,0.10,Qualquer eletronica
+Resistor 10K,1/4W 5%,1,0.10,Qualquer eletronica
+Resistor 100K 1%,1/4W metalfilme,1,0.50,Qualquer eletronica
+Capacitor 100nF,Ceramico,1,0.30,Qualquer eletronica
+Soquete rele,+ terminais Faston,1,6,Auto eletrica
+Step-down LM2596,24V->5V ajustavel,1,8,AliExpress
+Step-down LM2596,24V->12V ajustavel,1,8,AliExpress
+ESP32-S3-Zero,Waveshare original,1,40,Waveshare/AliExpress
+NTC 100K B3950,HT-NTC100K,1,5,Aliexpress
+Fan 120mm,4-pin PWM 12V,1,40,Kabum/Pichau
+Fio 14AWG,Vermelho/Preto silicone,1m,15,Loja modelismo
+TOTAL,,,~135,

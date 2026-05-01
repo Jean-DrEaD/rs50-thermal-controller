@@ -1,0 +1,76 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+
+      - name: Install ESP32 core
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@2.0.14
+
+      - name: Install libraries
+        run: |
+          arduino-cli lib install "FastLED@3.6.0"
+          arduino-cli lib install "WebSockets@2.4.1"
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Compile firmware
+        run: |
+          arduino-cli compile \
+            --fqbn esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=opi \
+            --output-dir ./release \
+            ./src/rs50_thermal/
+
+      - name: Rename artifacts
+        run: |
+          cd release
+          mv *.bin "rs50_thermal_${{ steps.version.outputs.VERSION }}.bin"
+          mv *.elf "rs50_thermal_${{ steps.version.outputs.VERSION }}.elf"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## RS50 Thermal Controller ${{ steps.version.outputs.VERSION }}
+            
+            ### Como gravar no ESP32-S3-Zero:
+            
+            1. Baixe o `.bin` desta release
+            2. Use o [ESP Web Tools](https://espressif.github.io/esptool-js/) ou esptool.py:
+               ```bash
+               esptool.py --chip esp32s3 --port /dev/ttyACM0 \
+                 write_flash 0x0 rs50_thermal_${{ steps.version.outputs.VERSION }}.bin
+               ```
+            3. Configure WiFi e LED_COUNT em `config.h` antes de gravar a partir do código fonte
+            
+            ### Documentação
+            - 📖 [README](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/README.md)
+            - 🌡️ [Calibration Guide](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/docs/calibration-guide.md)
+            - 📐 [Schematic](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/docs/wiring-schematic.svg)
+          files: |
+            release/*.bin
+            release/*.elf
+          draft: false
+          prerelease: false
