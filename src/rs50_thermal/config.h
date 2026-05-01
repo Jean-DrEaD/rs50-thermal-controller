@@ -9,7 +9,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define FW_VERSION "3.3.0"
+#define FW_VERSION "3.3.2"
 #define FW_NAME    "RS50-Thermal"
 
 // ═══════════════════════════════════════════════════════════════════════════

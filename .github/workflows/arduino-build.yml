@@ -14,38 +14,47 @@ jobs:
   build:
     name: Compile for ESP32-S3
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Arduino CLI
-        uses: arduino/setup-arduino-cli@v1
+        uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 core
+      - name: Install ESP32 core 3.x
         run: |
-          arduino-cli config init
+          arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
           arduino-cli core update-index
-          arduino-cli core install esp32:esp32@2.0.14
+          arduino-cli core install esp32:esp32@3.0.7
+          arduino-cli core list
 
-      - name: Install libraries
+      - name: Install libraries (matching local dev environment)
         run: |
-          arduino-cli lib install "FastLED@3.6.0"
+          arduino-cli lib install "FastLED@3.7.8"
           arduino-cli lib install "WebSockets@2.4.1"
+          arduino-cli lib list
 
-      - name: Compile sketch
+      - name: Compile sketch (ESP32-S3-Zero, no PSRAM)
         run: |
           arduino-cli compile \
-            --fqbn esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=opi \
-            --warnings all \
+            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none" \
+            --warnings default \
             --output-dir ./build \
             ./src/rs50_thermal/
 
       - name: Check binary size
         run: |
           ls -lh ./build/
-          echo "✅ Build successful"
+          if ls ./build/*.bin 1> /dev/null 2>&1; then
+            BIN_SIZE=$(stat -c%s ./build/*.bin | head -1)
+            echo "Firmware size: $BIN_SIZE bytes"
+            if [ "$BIN_SIZE" -gt 1310720 ]; then
+              echo "::warning::Firmware exceeds 1.25MB - check partition scheme"
+            fi
+          fi
+          echo "Build successful"
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
@@ -59,30 +68,32 @@ jobs:
   lint:
     name: Code Style Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check for tabs (require spaces)
         run: |
-          if grep -rP '\t' src/rs50_thermal/*.ino src/rs50_thermal/*.h; then
-            echo "❌ Tabs encontradas — use 2 espaços"
+          if grep -rP '\t' src/rs50_thermal/*.ino src/rs50_thermal/*.h 2>/dev/null; then
+            echo "Tabs found - use 2 spaces"
             exit 1
           fi
-          echo "✅ Indentação OK"
+          echo "Indentation OK"
 
       - name: Check trailing whitespace
         run: |
-          if grep -rP ' +$' src/rs50_thermal/*.ino src/rs50_thermal/*.h; then
-            echo "⚠️ Espaços ao final de linha encontrados"
+          if grep -rP ' +$' src/rs50_thermal/*.ino src/rs50_thermal/*.h 2>/dev/null; then
+            echo "Trailing whitespace found"
             exit 1
           fi
-          echo "✅ Sem trailing whitespace"
+          echo "No trailing whitespace"
 
-      - name: Verify version constant
+      - name: Verify version constant matches v3.3.x
         run: |
-          grep -q 'FW_VERSION "3.3.0"' src/rs50_thermal/config.h || {
-            echo "❌ FW_VERSION não corresponde ao esperado"
+          if ! grep -qE 'FW_VERSION\s+"3\.3\.[0-9]+"' src/rs50_thermal/config.h; then
+            echo "FW_VERSION must match pattern 3.3.x"
+            grep FW_VERSION src/rs50_thermal/config.h || true
             exit 1
-          }
-          echo "✅ Versão consistente"
+          fi
+          VERSION=$(grep -oP 'FW_VERSION\s+"\K[^"]+' src/rs50_thermal/config.h)
+          echo "Version detected: $VERSION"
