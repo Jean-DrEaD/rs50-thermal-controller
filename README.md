@@ -140,7 +140,7 @@ Volantes **Direct Drive** com motores hoverboard 15Nm geram **calor extremo** du
 | 1 | **Buck principal** | LM2596 (24V→12V, 3A) | R$ 8 |
 | 1 | **Buck lógica** | Mini-360 (12V→5V) | R$ 5 |
 | 1 | **MOSFET driver** | IRLZ44N + resistor 220Ω | R$ 3 |
-| 1 | **Fan** | 12V 80mm PWM 4-pin | R$ 25 |
+| 1 | **Fan** | 12V 120mm PWM 4-pin | R$ 25 |
 | 1-5 | **LEDs** | WS2812B (avulso ou strip) | R$ 2-10 |
 | 1 | **Resistor** | 100kΩ 1% (divisor NTC) | R$ 0.50 |
 | 1 | **Capacitor** | 100nF cerâmico (filtro ADC) | R$ 0.50 |
@@ -348,6 +348,56 @@ Sem ela, o `THERMAL_OFFSET` default (9°C) pode estar otimista ou pessimista par
 - Troubleshooting de problemas comuns
 - Tabela de ajustes para cenários típicos
 
+
+## 🛠️ Compilação & Build Status
+
+> ✅ **Status atual:** O sketch `src/rs50_thermal/rs50_thermal.ino` **compila sem erros nem warnings** na Arduino IDE 2.x com o core Arduino-ESP32 3.0+.
+
+### Configuração da placa (Arduino IDE)
+
+| Setting | Valor |
+|---------|-------|
+| **Board** | ESP32S3 Dev Module |
+| **USB CDC On Boot** | Enabled |
+| **USB Mode** | Hardware CDC and JTAG |
+| **Flash Size** | 4MB (32Mb) |
+| **Partition Scheme** | Default 4MB with spiffs |
+| **PSRAM** | Disabled (ESP32-S3-Zero) |
+| **Upload Speed** | 921600 |
+
+### Bibliotecas necessárias
+
+```text
+FastLED            >= 3.6.0
+WebSockets         >= 2.4.1   (Markus Sattler)
+ArduinoJson        >= 7.0.0
+```
+
+### Compilação rápida
+
+```bash
+# Clone
+git clone https://github.com/Jean-DrEaD/rs50-thermal-controller.git
+cd rs50-thermal-controller/src/rs50_thermal
+
+# Edite suas credenciais WiFi
+nano config.h
+
+# Abra rs50_thermal.ino na Arduino IDE -> Verify (Ctrl+R)
+# Conecte o ESP32-S3-Zero via USB-C -> Upload (Ctrl+U)
+```
+
+### Troubleshooting de upload
+
+| Sintoma | Solução |
+|---------|---------|
+| `Failed to connect to ESP32` | Segure **BOOT**, clique **RESET**, solte **BOOT** |
+| `Sketch too big` | Mude partição para `Huge APP (3MB No OTA)` |
+| `A fatal error occurred: MD5 mismatch` | Reduza Upload Speed para `460800` |
+| LEDs não acendem após boot | Verifique `LED_COUNT` em `config.h` e 5V no WS2812 |
+
+---
+
 ---
 
 ## 🤝 Contribuindo
@@ -376,29 +426,6 @@ Contribuições são **muito bem-vindas**! 🎉
 - **Commits**: [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, etc.)
 - **Código**: 2 espaços, sem tabs (validado pela Action)
 - **Versionamento**: [SemVer](https://semver.org/lang/pt-BR/)
-
----
-
-## 🗺️ Roadmap
-
-### v3.4 — *Próximo release*
-- [ ] OTA Updates via WiFi
-- [ ] Configuração via dashboard (sem recompilar)
-- [ ] Histórico CSV em SPIFFS
-- [ ] API REST `/api/status`, `/api/config`
-
-### v3.5
-- [ ] MQTT integration (Home Assistant)
-- [ ] Notificações push (Telegram/Discord webhook)
-- [ ] Modo "treino" (perfis de uso)
-
-### v4.0 — *Long term*
-- [ ] PCB customizada (KiCad)
-- [ ] Versão "Pro" com sensor extra no ODESC
-- [ ] App mobile dedicado
-- [ ] Suporte a outros motores (MaxxMotor, simucube clones)
-
-📋 **[Veja todas as issues abertas →](https://github.com/Jean-DrEaD/rs50-thermal-controller/issues)**
 
 ---
 
