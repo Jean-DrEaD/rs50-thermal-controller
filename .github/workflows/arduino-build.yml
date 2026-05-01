@@ -1,9 +1,3 @@
-
----
-
-## 🤖 `.github/workflows/arduino-build.yml`
-
-```yaml
 name: Arduino Build & Validate
 
 on:

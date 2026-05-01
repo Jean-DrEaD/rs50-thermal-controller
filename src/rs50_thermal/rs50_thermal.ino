@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════
-//  RS50 Thermal Controller v3.3.0 (FINAL)
+//  RS50 Thermal Controller v3.3.1
 //
 //  Hardware:
 //    - ESP32-S3-Zero (Waveshare)
@@ -16,6 +16,9 @@
 //    ✅ LED configurável: single / bar / thermometer
 //    ✅ Dashboard WiFi com WebSocket em tempo real
 //    ✅ Reconexão automática WiFi
+//
+//  Compatibilidade:
+//    - ESP32 Arduino Core 3.x (ledcAttach, ADC_ATTENDB_MAX)
 //
 //  Bibliotecas necessárias:
 //    - FastLED (Daniel Garcia)
@@ -205,7 +208,7 @@ void updateRelay() {
 void updatePWM() {
   if (thermalState >= THERMAL_CRITICAL) {
     pwmDuty = PWM_MAX;
-    ledcWrite(PWM_CHANNEL, 255);
+    ledcWrite(PIN_PWM, 255);
     return;
   }
   static float tempLastApplied = 25.0f;
@@ -217,7 +220,7 @@ void updatePWM() {
   else pwmDuty = PWM_MIN + (PWM_MAX - PWM_MIN) *
                   (temperature - TEMP_MIN) / (TEMP_MAX - TEMP_MIN);
   pwmDuty = constrain(pwmDuty, PWM_MIN, PWM_MAX);
-  ledcWrite(PWM_CHANNEL, (pwmDuty * 255) / 100);
+  ledcWrite(PIN_PWM, (pwmDuty * 255) / 100);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -571,14 +574,13 @@ void setup() {
   pinMode(PIN_RELAY, OUTPUT);
   digitalWrite(PIN_RELAY, RELAY_FAILSAFE_NC ? HIGH : LOW);
 
-  // PWM
-  ledcSetup(PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-  ledcAttachPin(PIN_PWM, PWM_CHANNEL);
-  ledcWrite(PWM_CHANNEL, 255);  // boot test
+  // PWM — API unificada ESP32 Arduino Core 3.x
+  ledcAttach(PIN_PWM, PWM_FREQ, PWM_RESOLUTION);
+  ledcWrite(PIN_PWM, 255);  // boot test
 
   // ADC
   analogReadResolution(12);
-  analogSetAttenuation(ADC_11db);
+  analogSetAttenuation(ADC_ATTENDB_MAX);  // ADC_11db renomeado no Core 3.x
 
   // LEDs
   FastLED.addLeds<LED_TYPE, PIN_LED_RGB, LED_COLOR_ORDER>(leds, LED_COUNT);

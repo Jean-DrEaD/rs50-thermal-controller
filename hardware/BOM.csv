@@ -1,16 +1,16 @@
-Componente,Especificacao,Quantidade,Preco_BRL,Onde_Comprar
-Rele Songle,SLA-24VDC-SL-C 30A SPDT,1,12,AliExpress/Mercado Livre
-MOSFET IRLZ44N,N-channel logic-level TO-220,1,4,AliExpress
-Diodo 1N4007,Retificador 1A 1000V,1,0.30,Qualquer eletronica
-Resistor 220R,1/4W 5%,1,0.10,Qualquer eletronica
-Resistor 10K,1/4W 5%,1,0.10,Qualquer eletronica
-Resistor 100K 1%,1/4W metalfilme,1,0.50,Qualquer eletronica
-Capacitor 100nF,Ceramico,1,0.30,Qualquer eletronica
-Soquete rele,+ terminais Faston,1,6,Auto eletrica
-Step-down LM2596,24V->5V ajustavel,1,8,AliExpress
-Step-down LM2596,24V->12V ajustavel,1,8,AliExpress
-ESP32-S3-Zero,Waveshare original,1,40,Waveshare/AliExpress
-NTC 100K B3950,HT-NTC100K,1,5,Aliexpress
-Fan 120mm,4-pin PWM 12V,1,40,Kabum/Pichau
-Fio 14AWG,Vermelho/Preto silicone,1m,15,Loja modelismo
-TOTAL,,,~135,
+qty,component,specification,unit_price_brl,notes
+1,MCU,Waveshare ESP32-S3-Zero,35.00,USB-C onboard
+1,Sensor NTC,NTC 100K B3950 encapsulado vidro,5.00,Montar no eixo do motor
+1,Rele,Songle SLA-24VDC-SL-C SPDT 30A,18.00,Usar contato NC (fail-safe)
+2,Buck LM2596,Step-down 3A ajustavel,8.00,#1: 24V->12V | #2: 12V->5V
+1,Buck Mini-360 (opcional),Step-down compacto,5.00,Alternativa ao LM2596 #2
+2,MOSFET driver,IRLZ44N N-MOSFET logic-level,3.00,#1: fan PWM | #2: bobina rele
+2,Resistor Gate,220 ohm 1/4W,0.20,Em serie com Gate (x2)
+2,Resistor Pull-down,10k ohm 1/4W,0.20,Gate->GND (x2)
+1,Fan,12V PWM 120mm 4-pin,35.00,Arctic P12 ou similar
+1,LED WS2812B,Avulso ou strip (1 a 5+ LEDs),5.00,Configuravel via LED_COUNT
+1,Resistor NTC,100k ohm 1% metal film,0.50,Divisor com NTC
+1,Capacitor filtro,100nF ceramico,0.50,Entre GPIO 1 e GND
+1,Diodo flyback,1N4007,0.50,Antiparalelo na bobina do rele
+1,Conectores,JST-XH variados + terminais ring,10.00,Para conexoes modulares
+1,Caixa,Impressa 3D ou PVC,10.00,Ventilacao e fixacao

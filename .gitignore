@@ -27,3 +27,6 @@ desktop.ini
 # Sensitive config (NUNCA commitar credenciais reais!)
 src/rs50_thermal/secrets.h
 src/rs50_thermal/wifi_credentials.h
+
+# Local backups
+.backup/
