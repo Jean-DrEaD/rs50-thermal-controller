@@ -1,0 +1,149 @@
+═══════════════════════════════════════════════════════════════════════════
+  RS50 THERMAL CONTROLLER — WIRING DIAGRAM (TEXT VERSION)
+  Version: 3.3.0
+═══════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          POWER DISTRIBUTION                              │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  XDrive Mini PSU ──┬── 24V ──► ODESC FFBeast (motor driver)
+   (24V/cabos       │
+    1.5mm² fios)    ├── 24V ──► Songle Relay COM (NC contact)
+                    │
+                    └── 24V ──► LM2596 ─► 12V ──┬── Fan 12V (via MOSFET)
+                                                 │
+                                                 └── Mini-360 ─► 5V ──► ESP32-S3-Zero VBUS
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          ESP32-S3-ZERO PINOUT                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+                       ┌──────────────────────┐
+                       │   ESP32-S3-Zero      │
+                       │                      │
+       NTC ─────────►  │ GPIO 1 (ADC1_CH0)    │
+                       │                      │
+       Fan PWM ◄─────  │ GPIO 2               │ ──► IRLZ44N Gate (220Ω)
+                       │                      │
+       WS2812 ◄──────  │ GPIO 3               │
+                       │                      │
+       Relay ◄───────  │ GPIO 4               │ ──► 2N2222 Base (1kΩ)
+                       │                      │
+                       │ GND ─────── GND      │
+                       │ 5V  ─────── VBUS     │
+                       └──────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          NTC THERMISTOR                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+       3.3V ──[100kΩ 1%]──┬──► GPIO 1 (ESP32 ADC)
+                          │
+                          │
+                       ┌──┴──┐
+                       │ NTC │  100K B3950
+                       │     │  (mounted on motor shaft)
+                       └──┬──┘
+                          │
+                         GND
+                          │
+                       (100nF cap between GPIO 1 and GND for noise)
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          FAN PWM (12V)                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+                    12V (from LM2596)
+                          │
+                          ├────────► Fan VCC (red wire)
+                          │
+                       ┌──┴──┐
+                       │ FAN │  12V PWM 80mm
+                       │     │
+                       └──┬──┘
+                          │
+                          ├────────► IRLZ44N Drain
+                          │
+                       ┌──┴────────┐
+                       │ IRLZ44N   │  N-MOSFET
+                       │           │
+                       │ G ──[220Ω]──► GPIO 2 (PWM)
+                       │           │
+                       │ S ───────────► GND
+                       └───────────┘
+                          │
+                          └─[10kΩ]─► GND  (pull-down do gate)
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       SAFETY RELAY (FAIL-SAFE NC)                        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+   ⚠️ ATENÇÃO: Use contato NORMALMENTE FECHADO (NC)!
+   Se o ESP travar/desenergizar, o motor CONTINUA ligado (fail-safe).
+   O relé só DESLIGA o motor em caso de TEMP_SHUTDOWN.
+
+                    24V
+                     │
+                     ▼
+                ┌─────────┐
+                │ Relé    │ COM ───► ODESC AC IN (motor power)
+                │ Songle  │
+                │ SLA-24V │ NC  ───► 24V (normalmente conectado)
+                │   30A   │
+                │         │ NO  ───► (não usado)
+                └────┬────┘
+                     │
+                     │ Coil 24V
+                     ▼
+                  [1N4007]    ◄── Diodo flyback (essencial!)
+                     │
+                  ┌──┴──┐
+                  │2N2222│ NPN driver
+                  │ NPN │
+                  └──┬──┘
+                     │
+                  [1kΩ]
+                     │
+                   GPIO 4 ───── (pull-down 10kΩ para GND)
+                              ◄── Pull-down evita acionamento durante boot
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          WS2812 LEDs                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+       5V ────────► WS2812 VCC (red)
+       GND ───────► WS2812 GND (black)
+       GPIO 3 ────► WS2812 DIN (data)
+
+       LED_COUNT configurável: 1, 3, ou 5+ LEDs
+       Configurar em config.h:
+         #define LED_COUNT  3
+         #define LED_MODE   MODE_BAR
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       CABLE SPECIFICATIONS                               │
+└─────────────────────────────────────────────────────────────────────────┘
+
+  ► Cabos 24V (XDrive Mini → ODESC):
+    - Diâmetro externo: 3mm
+    - Bitola fios: 1.5mm² (~16 AWG)
+    - Comprimento: original do kit
+    - Tipo: 2 condutores (V+ e GND)
+
+  ► Cabos NTC ao MCU:
+    - Bitola: 0.5mm² (~20 AWG) suficiente
+    - Comprimento máximo: 30cm (use par trançado se >20cm)
+    - Tipo: par trançado para reduzir ruído ADC
+
+  ► Cabos LED WS2812:
+    - Bitola: 0.5mm² (3 condutores: VCC, GND, DIN)
+    - Comprimento: <50cm (sinal RTC pode degradar)
+
+  ► Cabos relé:
+    - Bobina: 0.5mm² OK (corrente baixa)
+    - Contatos NC/COM: 2.5mm² mínimo (corrente do motor!)
+
+═══════════════════════════════════════════════════════════════════════════
+  Para diagrama gráfico, ver: docs/wiring-schematic.svg
+═══════════════════════════════════════════════════════════════════════════
