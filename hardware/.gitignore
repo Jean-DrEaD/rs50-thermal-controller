@@ -24,5 +24,3 @@ desktop.ini
 *.tmp
 *.swp
 *~
-# VS Code Local History extension
-.history/
