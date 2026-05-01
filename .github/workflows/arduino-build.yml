@@ -33,7 +33,7 @@ jobs:
       - name: Install libraries (matching local dev environment)
         run: |
           arduino-cli lib install "FastLED@3.7.8"
-          arduino-cli lib install "WebSockets@2.4.1"
+          arduino-cli lib install "WebSockets@2.7.2"
           arduino-cli lib list
 
       - name: Compile sketch (ESP32-S3-Zero, no PSRAM)
