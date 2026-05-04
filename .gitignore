@@ -1,20 +1,18 @@
 # ===== KiCad =====
-# Backups automáticos
 *.kicad_sch.backup
 *.kicad_sch.backup_*
 *.kicad_pcb.backup
 *.kicad_pcb.backup_*
 *-backups/
+.backup/
 _autosave-*
-
-# Lock files
 *.lck
 ~*.lck
+*.kicad_prl
 
-# Build outputs
+# ===== Build outputs =====
 hardware/gerbers/
 hardware/production/
-*.kicad_prl
 
 # ===== Scripts temporarios =====
 create-schematic.ps1
@@ -22,14 +20,14 @@ schematic-builder.ps1
 schematic-data.ps1
 setup-repo.ps1
 
-# ===== Arduino/PlatformIO =====
+# ===== VS Code Local History =====
+.history/
+hardware/.history/
+**/.history/
+
+# ===== Arduino =====
 src/**/*.ino.txt
 .pio/
-.vscode/
-
-# ===== History/Cache =====
-.history/
-hardware/.history
 
 # ===== OS =====
 Thumbs.db
