@@ -1,38 +1,37 @@
-# Arduino build output
-build/
-*.bin
-*.elf
-*.hex
-*.map
+# ===== KiCad =====
+# Backups automáticos
+*.kicad_sch.backup
+*.kicad_sch.backup_*
+*.kicad_pcb.backup
+*.kicad_pcb.backup_*
+*-backups/
+_autosave-*
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
+# Lock files
+*.lck
+~*.lck
 
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
+# Build outputs
+hardware/gerbers/
+hardware/production/
+*.kicad_prl
 
-# Logs
-*.log
-
-# Backup files
-*.bak
-*.tmp
-*~
-
-# Sensitive config (NUNCA commitar credenciais reais!)
-src/rs50_thermal/secrets.h
-src/rs50_thermal/wifi_credentials.h
-
-# Local backups
-.backup/
-
-# Scripts pessoais de setup local (não versionar)
+# ===== Scripts temporarios =====
+create-schematic.ps1
+schematic-builder.ps1
+schematic-data.ps1
 setup-repo.ps1
-update-repo.ps1
-create-hardware-structure.ps1
-create-symbols-*.ps1
+
+# ===== Arduino/PlatformIO =====
+src/**/*.ino.txt
+.pio/
+.vscode/
+
+# ===== History/Cache =====
+.history/
+hardware/.history
+
+# ===== OS =====
+Thumbs.db
+.DS_Store
+desktop.ini
