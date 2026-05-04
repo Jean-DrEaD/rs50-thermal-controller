@@ -1,0 +1,61 @@
+(footprint "Buck_Module_HW411_4pin_P2.54mm"
+	(version 20240108)
+	(generator "rs50-custom")
+	(generator_version "1.0")
+	(layer "F.Cu")
+	(descr "Buck converter module footprint (LM2596 / HW-411 / Mini-360), 4-pin 2.54mm header")
+	(tags "buck converter LM2596 HW-411 Mini-360 step-down")
+	(attr through_hole)
+	(property "Reference" "PS**"
+		(at 0 -12 0)
+		(layer "F.SilkS")
+		(effects (font (size 1 1) (thickness 0.15)))
+	)
+	(property "Value" "Buck_Module_HW411"
+		(at 0 12 0)
+		(layer "F.Fab")
+		(effects (font (size 1 1) (thickness 0.15)))
+	)
+	(property "Footprint" "" (at 0 0 0) (layer "F.Fab") hide
+		(effects (font (size 1.27 1.27))))
+	(property "Datasheet" "" (at 0 0 0) (layer "F.Fab") hide
+		(effects (font (size 1.27 1.27))))
+	(property "Description" "" (at 0 0 0) (layer "F.Fab") hide
+		(effects (font (size 1.27 1.27))))
+
+	(fp_text user "${REFERENCE}" (at 0 0 0) (layer "F.Fab")
+		(effects (font (size 1 1) (thickness 0.15))))
+
+	(fp_line (start -22 -10.5) (end 22 -10.5) (stroke (width 0.1) (type dash)) (layer "F.Fab"))
+	(fp_line (start 22 -10.5)  (end 22 10.5)  (stroke (width 0.1) (type dash)) (layer "F.Fab"))
+	(fp_line (start 22 10.5)   (end -22 10.5) (stroke (width 0.1) (type dash)) (layer "F.Fab"))
+	(fp_line (start -22 10.5)  (end -22 -10.5)(stroke (width 0.1) (type dash)) (layer "F.Fab"))
+
+	(fp_line (start -5 -2) (end 5 -2) (stroke (width 0.12) (type solid)) (layer "F.SilkS"))
+	(fp_line (start 5 -2)  (end 5 2)  (stroke (width 0.12) (type solid)) (layer "F.SilkS"))
+	(fp_line (start 5 2)   (end -5 2) (stroke (width 0.12) (type solid)) (layer "F.SilkS"))
+	(fp_line (start -5 2)  (end -5 -2)(stroke (width 0.12) (type solid)) (layer "F.SilkS"))
+
+	(fp_text user "VIN+" (at -3.81 -3.5 0) (layer "F.SilkS")
+		(effects (font (size 0.7 0.7) (thickness 0.1))))
+	(fp_text user "VIN-" (at -1.27 -3.5 0) (layer "F.SilkS")
+		(effects (font (size 0.7 0.7) (thickness 0.1))))
+	(fp_text user "VO+" (at 1.27 -3.5 0) (layer "F.SilkS")
+		(effects (font (size 0.7 0.7) (thickness 0.1))))
+	(fp_text user "VO-" (at 3.81 -3.5 0) (layer "F.SilkS")
+		(effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(fp_line (start -22.5 -11) (end 22.5 -11) (stroke (width 0.05) (type solid)) (layer "F.CrtYd"))
+	(fp_line (start 22.5 -11)  (end 22.5 11)  (stroke (width 0.05) (type solid)) (layer "F.CrtYd"))
+	(fp_line (start 22.5 11)   (end -22.5 11) (stroke (width 0.05) (type solid)) (layer "F.CrtYd"))
+	(fp_line (start -22.5 11)  (end -22.5 -11)(stroke (width 0.05) (type solid)) (layer "F.CrtYd"))
+
+	(pad "1" thru_hole rect (at -3.81 0) (size 1.7 1.7) (drill 1.0)
+		(layers "*.Cu" "*.Mask"))
+	(pad "2" thru_hole circle (at -1.27 0) (size 1.7 1.7) (drill 1.0)
+		(layers "*.Cu" "*.Mask"))
+	(pad "3" thru_hole circle (at 1.27 0) (size 1.7 1.7) (drill 1.0)
+		(layers "*.Cu" "*.Mask"))
+	(pad "4" thru_hole circle (at 3.81 0) (size 1.7 1.7) (drill 1.0)
+		(layers "*.Cu" "*.Mask"))
+)

@@ -178,4 +178,539 @@
 			)
 		)
 	)
+
+	(symbol "NTC_100K_B3950"
+		(pin_names (offset 0.254))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "TH"
+			(at -3.81 2.54 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "NTC_100K_B3950"
+			(at 0 -3.81 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" ""
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "NTC Thermistor 100k ohm B=3950, glass encapsulated, motor shaft mount"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "NTC_100K_B3950_0_1"
+			(rectangle (start -2.54 1.27) (end 2.54 -1.27)
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy -2.54 -1.27) (xy 2.54 1.27))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy -3.175 -1.905) (xy -2.54 -1.27))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+		)
+		(symbol "NTC_100K_B3950_1_1"
+			(pin passive line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "~" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at 5.08 0 180)
+				(length 2.54)
+				(name "~" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Relay_SLA-24VDC-SL-C"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "K"
+			(at -7.62 10.16 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "Relay_SLA-24VDC-SL-C"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Relay_THT:Relay_SPDT_Songle_SLA-XX-VDC-SL-A"
+			(at 0 -15.24 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://www.songle.com/pdf/SLA.pdf"
+			(at 0 -17.78 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "Songle SLA-24VDC-SL-C SPDT 30A relay, 24V coil. FAIL-SAFE: use NC contact"
+			(at 0 -20.32 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "MPN" "SLA-24VDC-SL-C"
+			(at 0 -22.86 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Manufacturer" "Songle"
+			(at 0 -25.4 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Relay_SLA-24VDC-SL-C_0_1"
+			(rectangle (start -7.62 7.62) (end 7.62 -7.62)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(arc (start -5.08 -2.54) (mid -3.81 -1.27) (end -5.08 0)
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(arc (start -5.08 0) (mid -3.81 1.27) (end -5.08 2.54)
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy -7.62 5.08) (xy -5.08 5.08) (xy -5.08 2.54))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy -7.62 -5.08) (xy -5.08 -5.08) (xy -5.08 -2.54))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy 5.08 5.08) (xy 7.62 5.08))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy 5.08 -5.08) (xy 7.62 -5.08))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy 5.08 0) (xy 7.62 0))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(polyline (pts (xy 5.08 0) (xy 5.08 5.08))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+			(text "NC" (at 4.318 5.08 0) (effects (font (size 1.0 1.0)) (justify right)))
+			(text "NO" (at 4.318 -5.08 0) (effects (font (size 1.0 1.0)) (justify right)))
+			(text "COM" (at 4.318 0 0) (effects (font (size 1.0 1.0)) (justify right)))
+			(text "A1" (at -6.35 5.842 0) (effects (font (size 0.9 0.9)) (justify left)))
+			(text "A2" (at -6.35 -5.842 0) (effects (font (size 0.9 0.9)) (justify left)))
+		)
+		(symbol "Relay_SLA-24VDC-SL-C_1_1"
+			(pin passive line
+				(at 10.16 0 180)
+				(length 2.54)
+				(name "COM" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at 10.16 5.08 180)
+				(length 2.54)
+				(name "NC" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at 10.16 -5.08 180)
+				(length 2.54)
+				(name "NO" (effects (font (size 1.27 1.27))))
+				(number "3" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at -10.16 5.08 0)
+				(length 2.54)
+				(name "A1" (effects (font (size 1.27 1.27))))
+				(number "4" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at -10.16 -5.08 0)
+				(length 2.54)
+				(name "A2" (effects (font (size 1.27 1.27))))
+				(number "5" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "IRLZ44N"
+		(pin_names (offset 0.254))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "Q"
+			(at 5.08 5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "IRLZ44N"
+			(at 5.08 -5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Package_TO_SOT_THT:TO-220-3_Vertical"
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://www.infineon.com/dgdl/irlz44npbf.pdf"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "N-CH Logic Level MOSFET 55V 47A TO-220, Vgs(th) 1-2V, ideal for 3.3V drive"
+			(at 0 -15.24 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "MPN" "IRLZ44NPBF"
+			(at 0 -17.78 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Manufacturer" "Infineon"
+			(at 0 -20.32 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "IRLZ44N_0_1"
+			(circle (center 1.27 0) (radius 3.81)
+				(stroke (width 0.1524) (type default)) (fill (type none)))
+			(polyline (pts (xy -1.016 -2.54) (xy -1.016 2.54))
+				(stroke (width 0.508) (type default)) (fill (type none)))
+			(polyline (pts (xy -1.016 1.778) (xy 2.54 1.778) (xy 2.54 5.08))
+				(stroke (width 0.1524) (type default)) (fill (type none)))
+			(polyline (pts (xy -1.016 -1.778) (xy 2.54 -1.778) (xy 2.54 -5.08))
+				(stroke (width 0.1524) (type default)) (fill (type none)))
+			(polyline (pts (xy 1.016 -1.778) (xy 0.254 -1.27) (xy 0.254 -2.286) (xy 1.016 -1.778))
+				(stroke (width 0.1524) (type default)) (fill (type outline)))
+			(polyline (pts (xy -2.54 0) (xy -1.524 0))
+				(stroke (width 0.1524) (type default)) (fill (type none)))
+		)
+		(symbol "IRLZ44N_1_1"
+			(pin input line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "G" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at 2.54 7.62 270)
+				(length 2.54)
+				(name "D" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at 2.54 -7.62 90)
+				(length 2.54)
+				(name "S" (effects (font (size 1.27 1.27))))
+				(number "3" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Diode_1N4007"
+		(pin_names (offset 0.254) hide)
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "D"
+			(at -3.81 1.27 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "1N4007"
+			(at 0 -2.54 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal"
+			(at 0 -5.08 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://www.vishay.com/docs/88503/1n4001.pdf"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "1N4007 rectifier diode 1A 1000V, used as flyback for relay coil"
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Diode_1N4007_0_1"
+			(polyline (pts (xy -1.016 1.016) (xy -1.016 -1.016) (xy 1.016 0) (xy -1.016 1.016))
+				(stroke (width 0.254) (type default)) (fill (type outline)))
+			(polyline (pts (xy 1.016 1.016) (xy 1.016 -1.016))
+				(stroke (width 0.254) (type default)) (fill (type none)))
+		)
+		(symbol "Diode_1N4007_1_1"
+			(pin passive line
+				(at -3.81 0 0)
+				(length 2.54)
+				(name "K" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at 3.81 0 180)
+				(length 2.54)
+				(name "A" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Buck_Module_HW411"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "PS"
+			(at -5.08 7.62 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "Buck_Module_HW411"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "rs50-custom:Buck_Module_HW411_4pin_P2.54mm"
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" ""
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "Adjustable buck converter module (HW-411 / LM2596 / Mini-360 footprint, 4-pin 2.54mm header)"
+			(at 0 -15.24 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Buck_Module_HW411_0_1"
+			(rectangle (start -5.08 5.08) (end 5.08 -5.08)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(text "BUCK" (at 0 1.27 0) (effects (font (size 1.27 1.27))))
+			(text "DC-DC" (at 0 -1.27 0) (effects (font (size 1.0 1.0))))
+		)
+		(symbol "Buck_Module_HW411_1_1"
+			(pin power_in line
+				(at -7.62 2.54 0)
+				(length 2.54)
+				(name "VIN+" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_in line
+				(at -7.62 -2.54 0)
+				(length 2.54)
+				(name "VIN-" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_out line
+				(at 7.62 2.54 180)
+				(length 2.54)
+				(name "VOUT+" (effects (font (size 1.27 1.27))))
+				(number "3" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_out line
+				(at 7.62 -2.54 180)
+				(length 2.54)
+				(name "VOUT-" (effects (font (size 1.27 1.27))))
+				(number "4" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Fan_4Pin_PWM_Header"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "J"
+			(at -5.08 7.62 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "Fan_4Pin_PWM_Header"
+			(at 0 -8.89 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Connector_Wire:SolderWirePad_1x04_P2.54mm_Drill0.8mm"
+			(at 0 -11.43 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://noctua.at/pub/media/wysiwyg/Noctua_PWM_specifications_white_paper.pdf"
+			(at 0 -13.97 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "4-pin PC fan PWM header (12V/GND/Tach/PWM 25kHz), 2.54mm pitch"
+			(at 0 -16.51 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Fan_4Pin_PWM_Header_0_1"
+			(rectangle (start -2.54 5.08) (end 2.54 -5.08)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(text "FAN" (at 0 0 0) (effects (font (size 1.27 1.27))))
+		)
+		(symbol "Fan_4Pin_PWM_Header_1_1"
+			(pin power_in line
+				(at -5.08 3.81 0)
+				(length 2.54)
+				(name "GND" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_in line
+				(at -5.08 1.27 0)
+				(length 2.54)
+				(name "+12V" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+			(pin input line
+				(at -5.08 -1.27 0)
+				(length 2.54)
+				(name "TACH" (effects (font (size 1.27 1.27))))
+				(number "3" (effects (font (size 1.27 1.27))))
+			)
+			(pin output line
+				(at -5.08 -3.81 0)
+				(length 2.54)
+				(name "PWM" (effects (font (size 1.27 1.27))))
+				(number "4" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Conn_XT60_Power_Input"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "J"
+			(at -5.08 5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "Conn_XT60_Power_Input"
+			(at 0 -5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "rs50-custom:Conn_XT60_PCB_Mount"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" ""
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "XT60 PCB-mount connector for 24V external power input (high current DC, 60A continuous rating)"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Conn_XT60_Power_Input_0_1"
+			(rectangle (start -2.54 2.54) (end 2.54 -2.54)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(text "XT60" (at 0 0 0) (effects (font (size 1.0 1.0))))
+		)
+		(symbol "Conn_XT60_Power_Input_1_1"
+			(pin power_in line
+				(at -5.08 1.27 0)
+				(length 2.54)
+				(name "+24V" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_in line
+				(at -5.08 -1.27 0)
+				(length 2.54)
+				(name "GND" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Conn_Motor_Output"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "J"
+			(at -5.08 5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "Conn_Motor_Output"
+			(at 0 -5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" ""
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "Screw terminal block 5.08mm 2-pin for switched 24V output to ODESC FFBeast (motor power)"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Conn_Motor_Output_0_1"
+			(rectangle (start -2.54 2.54) (end 2.54 -2.54)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(text "MOTOR" (at 0 0 0) (effects (font (size 0.9 0.9))))
+		)
+		(symbol "Conn_Motor_Output_1_1"
+			(pin power_out line
+				(at -5.08 1.27 0)
+				(length 2.54)
+				(name "+24V_SW" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_out line
+				(at -5.08 -1.27 0)
+				(length 2.54)
+				(name "GND" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "WS2812_Header_3pin"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "J"
+			(at -5.08 5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "WS2812_Header_3pin"
+			(at 0 -5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" "https://www.world-semi.com/Certifications/WS2812B.html"
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "3-pin header for WS2812B addressable LED strip (5V/DIN/GND), 2.54mm pitch"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "WS2812_Header_3pin_0_1"
+			(rectangle (start -2.54 3.81) (end 2.54 -3.81)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(text "WS2812" (at 0 0 0) (effects (font (size 0.9 0.9))))
+		)
+		(symbol "WS2812_Header_3pin_1_1"
+			(pin power_in line
+				(at -5.08 2.54 0)
+				(length 2.54)
+				(name "+5V" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin input line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "DIN" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+			(pin power_in line
+				(at -5.08 -2.54 0)
+				(length 2.54)
+				(name "GND" (effects (font (size 1.27 1.27))))
+				(number "3" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
+	(symbol "Conn_NTC_2pin"
+		(pin_names (offset 1.016))
+		(exclude_from_sim no) (in_bom yes) (on_board yes)
+		(property "Reference" "J"
+			(at -5.08 5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Value" "Conn_NTC_2pin"
+			(at 0 -5.08 0)
+			(effects (font (size 1.27 1.27)) (justify left))
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 0 -7.62 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Datasheet" ""
+			(at 0 -10.16 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(property "Description" "2-pin header for NTC thermistor cable (twisted pair recommended for noise immunity)"
+			(at 0 -12.7 0)
+			(effects (font (size 1.27 1.27)) hide)
+		)
+		(symbol "Conn_NTC_2pin_0_1"
+			(rectangle (start -2.54 2.54) (end 2.54 -2.54)
+				(stroke (width 0.254) (type default)) (fill (type background)))
+			(text "NTC" (at 0 0 0) (effects (font (size 1.0 1.0))))
+		)
+		(symbol "Conn_NTC_2pin_1_1"
+			(pin passive line
+				(at -5.08 1.27 0)
+				(length 2.54)
+				(name "SIG" (effects (font (size 1.27 1.27))))
+				(number "1" (effects (font (size 1.27 1.27))))
+			)
+			(pin passive line
+				(at -5.08 -1.27 0)
+				(length 2.54)
+				(name "GND" (effects (font (size 1.27 1.27))))
+				(number "2" (effects (font (size 1.27 1.27))))
+			)
+		)
+	)
 )

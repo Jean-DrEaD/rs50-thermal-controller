@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "rs50-custom") (type "KiCad") (uri "${KIPRJMOD}/footprints/rs50-custom.pretty") (options "") (descr "RS50 Thermal custom footprints"))
+)
