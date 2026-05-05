@@ -1,207 +1,204 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" font-family="monospace" font-size="11">
-  <style>
-    .wire-power{stroke:#c00;stroke-width:2.5;fill:none}
-    .wire-gnd{stroke:#000;stroke-width:2;fill:none}
-    .wire-signal{stroke:#06c;stroke-width:1.5;fill:none}
-    .wire-12v{stroke:#f80;stroke-width:2;fill:none}
-    .wire-5v{stroke:#093;stroke-width:1.5;fill:none}
-    .ic{fill:#eef;stroke:#333;stroke-width:1.5}
-    .label{font-weight:bold}
-    .pin{font-size:9px;fill:#444}
-    text{font-family:'Courier New',monospace}
-  </style>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 820" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <style><![CDATA[
+      .title    { font-size: 22px; font-weight: 700; fill: #1a1a1a; }
+      .subtitle { font-size: 12px; fill: #555; }
+      .block    { fill: #f8f9fa; stroke: #2c3e50; stroke-width: 2; rx: 8; }
+      .mcu      { fill: #e8f4fd; stroke: #1976d2; stroke-width: 2.5; rx: 10; }
+      .power    { fill: #fff4e6; stroke: #e65100; stroke-width: 2; rx: 8; }
+      .relay    { fill: #fce4ec; stroke: #c2185b; stroke-width: 2; rx: 8; }
+      .sensor   { fill: #e8f5e9; stroke: #2e7d32; stroke-width: 2; rx: 8; }
+      .label    { font-size: 12px; fill: #1a1a1a; font-weight: 700; }
+      .pin      { font-size: 10px; fill: #333; font-family: 'Consolas', monospace; }
+      .wire24   { stroke: #d32f2f; stroke-width: 3; fill: none; }
+      .wire12   { stroke: #f57c00; stroke-width: 2.5; fill: none; }
+      .wire5    { stroke: #fbc02d; stroke-width: 2; fill: none; }
+      .wiregnd  { stroke: #212121; stroke-width: 2; fill: none; }
+      .wiresig  { stroke: #1976d2; stroke-width: 1.8; fill: none; }
+      .wireac   { stroke: #6a1b9a; stroke-width: 2.8; fill: none; stroke-dasharray: 6 3; }
+      .legend   { font-size: 11px; fill: #1a1a1a; }
+      .warn     { font-size: 10px; fill: #c2185b; font-weight: 700; }
+    ]]></style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+  </defs>
 
-  <!-- Título -->
-  <text x="500" y="25" text-anchor="middle" font-size="16" class="label">RS50 Thermal Controller — Schematic v3.3</text>
-  <text x="500" y="42" text-anchor="middle" font-size="11" fill="#666">Sistema de proteção térmica para volante DD com motor Hoverboard 15Nm</text>
+  <text x="640" y="35" text-anchor="middle" class="title">RS50 Thermal Controller — Wiring Schematic v3.4.0</text>
+  <text x="640" y="55" text-anchor="middle" class="subtitle">Hardware fail-safe • Fonte 24V • ESP32-S3-Zero • Rele NC • Fan PWM 25kHz</text>
 
-  <!-- ====== FONTE 24V ====== -->
-  <rect x="30" y="80" width="120" height="80" class="ic"/>
-  <text x="90" y="110" text-anchor="middle" class="label">FONTE 24V</text>
-  <text x="90" y="128" text-anchor="middle">30A SMPS</text>
-  <text x="90" y="148" text-anchor="middle" font-size="9">220V AC IN</text>
-  <text x="155" y="108" class="pin">+24V</text>
-  <text x="155" y="148" class="pin">GND</text>
-  <circle cx="150" cy="105" r="3" fill="#c00"/>
-  <circle cx="150" cy="145" r="3" fill="#000"/>
+  <!-- FONTE 24V -->
+  <rect x="40" y="100" width="180" height="80" class="power"/>
+  <text x="130" y="128" text-anchor="middle" class="label">Fonte 24V</text>
+  <text x="130" y="148" text-anchor="middle" class="pin">XDrive Mini</text>
+  <text x="130" y="165" text-anchor="middle" class="pin">XT60 macho (chicote)</text>
 
-  <!-- ====== CHAVE MASTER ====== -->
-  <line x1="153" y1="105" x2="200" y2="105" class="wire-power"/>
-  <text x="210" y="80" class="label">Chave ON/OFF</text>
-  <line x1="200" y1="105" x2="220" y2="105" class="wire-power"/>
-  <line x1="220" y1="105" x2="245" y2="95" class="wire-power"/>
-  <circle cx="220" cy="105" r="2" fill="#000"/>
-  <circle cx="248" cy="93" r="2" fill="#000"/>
-  <line x1="248" y1="93" x2="270" y2="105" class="wire-power" stroke-dasharray="0"/>
-  <text x="235" y="125" font-size="9" fill="#888">SPST</text>
-  <line x1="270" y1="105" x2="320" y2="105" class="wire-power"/>
+  <!-- XT60 FEMEA -->
+  <rect x="270" y="100" width="120" height="80" class="block"/>
+  <text x="330" y="128" text-anchor="middle" class="label">XT60 Femea</text>
+  <text x="330" y="148" text-anchor="middle" class="pin">PCB-mount</text>
+  <circle cx="290" cy="195" r="4" fill="#d32f2f"/>
+  <circle cx="370" cy="195" r="4" fill="#212121"/>
+  <text x="290" y="220" text-anchor="middle" class="pin">V+</text>
+  <text x="370" y="220" text-anchor="middle" class="pin">GND</text>
 
-  <!-- GND comum -->
-  <line x1="153" y1="145" x2="900" y2="145" class="wire-gnd"/>
-  <text x="900" y="140" class="pin">GND comum</text>
+  <line x1="220" y1="140" x2="270" y2="140" class="wire24" marker-end="url(#arrow)"/>
+  <!-- HW-411 #1 -->
+  <rect x="450" y="80" width="180" height="130" class="power"/>
+  <text x="540" y="105" text-anchor="middle" class="label">HW-411 #1</text>
+  <text x="540" y="124" text-anchor="middle" class="pin">LM2596 24V para 12V</text>
+  <text x="540" y="140" text-anchor="middle" class="pin">3A - Ajustar Vout=12.0V</text>
+  <text x="468" y="175" class="pin">IN+</text>
+  <text x="468" y="195" class="pin">IN-</text>
+  <text x="592" y="175" class="pin">OUT+</text>
+  <text x="592" y="195" class="pin">OUT-</text>
+  <circle cx="458" cy="172" r="3" fill="#d32f2f"/>
+  <circle cx="458" cy="192" r="3" fill="#212121"/>
+  <circle cx="622" cy="172" r="3" fill="#f57c00"/>
+  <circle cx="622" cy="192" r="3" fill="#212121"/>
 
-  <!-- ====== RELÉ SONGLE ====== -->
-  <rect x="320" y="75" width="160" height="120" class="ic" fill="#cef"/>
-  <text x="400" y="95" text-anchor="middle" class="label">RELÉ SPDT</text>
-  <text x="400" y="110" text-anchor="middle">Songle SLA-24VDC-SL-C</text>
-  <text x="400" y="125" text-anchor="middle" font-size="9">30A / 30VDC</text>
-  <!-- Bobina (símbolo) -->
-  <path d="M 340 145 Q 350 135 360 145 Q 370 155 380 145 Q 390 135 400 145" stroke="#333" fill="none" stroke-width="1.5"/>
-  <text x="370" y="170" font-size="9" text-anchor="middle">Bobina 24V</text>
-  <line x1="320" y1="145" x2="335" y2="145" class="wire-signal"/>
-  <line x1="400" y1="145" x2="480" y2="145" class="wire-signal"/>
-  <text x="335" y="180" class="pin">A1 (+)</text>
-  <text x="445" y="180" class="pin">A2 (-)</text>
-  <!-- Contatos -->
-  <line x1="320" y1="105" x2="345" y2="105" class="wire-power"/>
-  <text x="328" y="100" class="pin">COM</text>
-  <line x1="345" y1="105" x2="370" y2="90" stroke="#000" stroke-width="2"/>
-  <circle cx="345" cy="105" r="2"/>
-  <circle cx="372" cy="88" r="2"/>
-  <text x="380" y="80" font-size="9">NO (não usar)</text>
-  <line x1="345" y1="105" x2="475" y2="115" class="wire-power" stroke-dasharray="2,2"/>
-  <text x="430" y="130" font-size="9" fill="#080">NC ←(repouso)</text>
-  <line x1="475" y1="115" x2="540" y2="115" class="wire-power"/>
+  <line x1="290" y1="195" x2="290" y2="172" class="wire24"/>
+  <line x1="290" y1="172" x2="458" y2="172" class="wire24"/>
+  <line x1="370" y1="195" x2="370" y2="192" class="wiregnd"/>
+  <line x1="370" y1="192" x2="458" y2="192" class="wiregnd"/>
 
-  <!-- ====== ODESC ====== -->
-  <rect x="540" y="75" width="160" height="100" class="ic" fill="#fcc"/>
-  <text x="620" y="100" text-anchor="middle" class="label">ODESC FFBeast</text>
-  <text x="620" y="118" text-anchor="middle">MKS XDrive Mini</text>
-  <text x="620" y="135" text-anchor="middle" font-size="9">+ Motor Hoverboard</text>
-  <text x="620" y="150" text-anchor="middle" font-size="9">15Nm DD</text>
-  <text x="540" y="115" text-anchor="end" class="pin">+24V</text>
-  <line x1="620" y1="175" x2="620" y2="145" class="wire-gnd"/>
+  <!-- HW-411 #2 -->
+  <rect x="710" y="80" width="180" height="130" class="power"/>
+  <text x="800" y="105" text-anchor="middle" class="label">HW-411 #2</text>
+  <text x="800" y="124" text-anchor="middle" class="pin">LM2596 12V para 5V</text>
+  <text x="800" y="140" text-anchor="middle" class="pin">1A - Ajustar Vout=5.0V</text>
+  <text x="728" y="175" class="pin">IN+</text>
+  <text x="728" y="195" class="pin">IN-</text>
+  <text x="852" y="175" class="pin">OUT+</text>
+  <text x="852" y="195" class="pin">OUT-</text>
+  <circle cx="718" cy="172" r="3" fill="#f57c00"/>
+  <circle cx="718" cy="192" r="3" fill="#212121"/>
+  <circle cx="882" cy="172" r="3" fill="#fbc02d"/>
+  <circle cx="882" cy="192" r="3" fill="#212121"/>
 
-  <!-- ====== STEP-DOWNS ====== -->
-  <rect x="60" y="260" width="100" height="55" class="ic" fill="#fec"/>
-  <text x="110" y="280" text-anchor="middle" class="label">LM2596</text>
-  <text x="110" y="295" text-anchor="middle" font-size="9">24V → 5V</text>
-  <text x="110" y="308" text-anchor="middle" font-size="8" fill="#a00">ajustar trimpot!</text>
-  <line x1="280" y1="105" x2="280" y2="270" class="wire-power"/>
-  <line x1="280" y1="270" x2="160" y2="270" class="wire-power"/>
-  <circle cx="280" cy="105" r="2"/>
-  <line x1="60" y1="290" x2="40" y2="290" class="wire-gnd"/>
-  <line x1="40" y1="290" x2="40" y2="145" class="wire-gnd"/>
-  <line x1="40" y1="145" x2="153" y2="145" class="wire-gnd"/>
-  <line x1="160" y1="290" x2="220" y2="290" class="wire-5v"/>
-  <text x="180" y="285" class="pin">+5V</text>
+  <line x1="622" y1="172" x2="718" y2="172" class="wire12"/>
+  <line x1="622" y1="192" x2="718" y2="192" class="wiregnd"/>
 
-  <rect x="60" y="335" width="100" height="55" class="ic" fill="#fec"/>
-  <text x="110" y="355" text-anchor="middle" class="label">LM2596</text>
-  <text x="110" y="370" text-anchor="middle" font-size="9">24V → 12V</text>
-  <text x="110" y="383" text-anchor="middle" font-size="8" fill="#a00">para fan PWM</text>
-  <line x1="280" y1="270" x2="280" y2="345" class="wire-power"/>
-  <line x1="280" y1="345" x2="160" y2="345" class="wire-power"/>
-  <line x1="60" y1="365" x2="40" y2="365" class="wire-gnd"/>
-  <line x1="40" y1="365" x2="40" y2="290" class="wire-gnd"/>
-  <line x1="160" y1="365" x2="780" y2="365" class="wire-12v"/>
-  <text x="180" y="360" class="pin">+12V</text>
+  <!-- FAN -->
+  <rect x="450" y="280" width="180" height="110" class="block"/>
+  <text x="540" y="305" text-anchor="middle" class="label">FAN 120mm 4-pin</text>
+  <text x="540" y="322" text-anchor="middle" class="pin">12V Intel-style PWM</text>
+  <text x="475" y="350" class="pin">+12V (amarelo)</text>
+  <text x="475" y="368" class="pin">GND  (preto)</text>
+  <text x="540" y="385" text-anchor="middle" class="warn">PWM (azul) - GPIO5    TACH (verde) X</text>
 
-  <!-- ====== ESP32-S3-Zero ====== -->
-  <rect x="240" y="240" width="220" height="180" class="ic" fill="#def"/>
-  <text x="350" y="265" text-anchor="middle" class="label">ESP32-S3-Zero</text>
-  <text x="350" y="280" text-anchor="middle" font-size="9">(Waveshare)</text>
-  <line x1="240" y1="295" x2="220" y2="295" class="wire-5v"/>
-  <text x="245" y="299" class="pin">5V</text>
-  <line x1="240" y1="315" x2="225" y2="315" class="wire-gnd"/>
-  <text x="245" y="319" class="pin">GND</text>
-  <line x1="225" y1="315" x2="225" y2="145" class="wire-gnd"/>
-  <text x="245" y="345" class="pin">GPIO 5 (PWM)</text>
-  <line x1="460" y1="345" x2="490" y2="345" class="wire-signal"/>
-  <text x="245" y="365" class="pin">GPIO 1 (ADC)</text>
-  <line x1="460" y1="365" x2="490" y2="365" class="wire-signal"/>
-  <text x="245" y="385" class="pin">GPIO 4 (relé)</text>
-  <line x1="460" y1="385" x2="510" y2="385" class="wire-signal"/>
-  <text x="245" y="405" class="pin">GPIO 21 (LED)</text>
-  <line x1="460" y1="405" x2="780" y2="405" class="wire-signal"/>
+  <line x1="622" y1="172" x2="660" y2="172" class="wire12"/>
+  <line x1="660" y1="172" x2="660" y2="350" class="wire12"/>
+  <line x1="660" y1="350" x2="475" y2="350" class="wire12"/>
 
-  <!-- ====== DRIVER MOSFET ====== -->
-  <rect x="510" y="320" width="180" height="120" class="ic" fill="#fec"/>
-  <text x="600" y="340" text-anchor="middle" class="label">DRIVER do RELÉ</text>
-  <!-- Símbolo MOSFET N -->
-  <line x1="540" y1="370" x2="560" y2="370" class="wire-signal"/>
-  <text x="535" y="368" class="pin">G</text>
-  <text x="555" y="358" font-size="9">220Ω</text>
-  <line x1="560" y1="370" x2="580" y2="370" class="wire-signal"/>
-  <line x1="580" y1="350" x2="580" y2="390" stroke="#333" stroke-width="2"/>
-  <line x1="580" y1="350" x2="600" y2="345" stroke="#333" stroke-width="1.5"/>
-  <line x1="580" y1="390" x2="600" y2="395" stroke="#333" stroke-width="1.5"/>
-  <line x1="600" y1="345" x2="600" y2="335" stroke="#333" stroke-width="1.5"/>
-  <line x1="600" y1="395" x2="600" y2="410" stroke="#333" stroke-width="1.5"/>
-  <text x="605" y="368" font-size="9">IRLZ44N</text>
-  <text x="608" y="345" class="pin">D</text>
-  <text x="608" y="408" class="pin">S</text>
-  <!-- Pull-down -->
-  <line x1="560" y1="370" x2="560" y2="425" class="wire-signal"/>
-  <text x="565" y="400" font-size="9">10kΩ</text>
-  <line x1="560" y1="425" x2="660" y2="425" class="wire-gnd"/>
-  <line x1="600" y1="410" x2="660" y2="410" class="wire-gnd"/>
-  <line x1="660" y1="410" x2="660" y2="425" class="wire-gnd"/>
-  <line x1="660" y1="425" x2="660" y2="145" class="wire-gnd"/>
-  <!-- Drain → bobina A2 -->
-  <line x1="600" y1="335" x2="600" y2="320" class="wire-signal"/>
-  <line x1="600" y1="320" x2="465" y2="320" class="wire-signal"/>
-  <line x1="465" y1="320" x2="465" y2="195" class="wire-signal"/>
-  <text x="470" y="260" font-size="8">A2 (–)</text>
-  <!-- Bobina + para 24V via diodo -->
-  <line x1="345" y1="195" x2="345" y2="220" class="wire-power"/>
-  <line x1="345" y1="220" x2="285" y2="220" class="wire-power"/>
-  <line x1="285" y1="220" x2="285" y2="105" class="wire-power"/>
-  <text x="290" y="215" font-size="8">A1 (+) ←24V</text>
-  <!-- Diodo flyback -->
-  <text x="385" y="245" font-size="9" fill="#080">1N4007</text>
-  <line x1="465" y1="245" x2="345" y2="245" stroke="#080" stroke-width="1.5"/>
-  <polygon points="395,240 395,250 405,245" fill="#080"/>
-  <line x1="395" y1="237" x2="395" y2="253" stroke="#080" stroke-width="1.5"/>
-  <text x="345" y="240" font-size="8" fill="#080">K</text>
-  <text x="455" y="240" font-size="8" fill="#080">A</text>
+  <line x1="622" y1="192" x2="425" y2="192" class="wiregnd"/>
+  <line x1="425" y1="192" x2="425" y2="368" class="wiregnd"/>
+  <line x1="425" y1="368" x2="475" y2="368" class="wiregnd"/>
 
-  <!-- ====== NTC ====== -->
-  <rect x="490" y="450" width="160" height="80" class="ic" fill="#fdf"/>
-  <text x="570" y="470" text-anchor="middle" class="label">Divisor NTC</text>
-  <text x="500" y="490" font-size="9">3V3 ──[100kΩ 1%]──┬─→ ADC</text>
-  <text x="500" y="505" font-size="9">                   ├─[NTC 100K]─ GND</text>
-  <text x="500" y="520" font-size="9">                   └─[100nF]── GND</text>
+  <!-- ESP32-S3-ZERO -->
+  <rect x="940" y="280" width="200" height="240" class="mcu"/>
+  <text x="1040" y="305" text-anchor="middle" class="label">ESP32-S3-Zero</text>
+  <text x="1040" y="322" text-anchor="middle" class="pin">Waveshare</text>
+  <text x="960" y="355" class="pin">5V</text>
+  <text x="960" y="378" class="pin">GND</text>
+  <text x="960" y="410" class="pin">GPIO1  (NTC)</text>
+  <text x="960" y="433" class="pin">GPIO4  (RELAY)</text>
+  <text x="960" y="456" class="pin">GPIO5  (PWM)</text>
+  <text x="960" y="479" class="pin">GPIO21 (LED)</text>
+  <circle cx="950" cy="352" r="3" fill="#fbc02d"/>
+  <circle cx="950" cy="375" r="3" fill="#212121"/>
+  <circle cx="950" cy="407" r="3" fill="#1976d2"/>
+  <circle cx="950" cy="430" r="3" fill="#1976d2"/>
+  <circle cx="950" cy="453" r="3" fill="#1976d2"/>
+  <circle cx="950" cy="476" r="3" fill="#1976d2"/>
 
-  <!-- ====== FAN ====== -->
-  <circle cx="820" cy="365" r="40" fill="#cef" stroke="#333" stroke-width="1.5"/>
-  <text x="820" y="360" text-anchor="middle" class="label">FAN</text>
-  <text x="820" y="375" text-anchor="middle" font-size="9">120mm 12V</text>
-  <text x="820" y="388" text-anchor="middle" font-size="9">4-pin PWM</text>
-  <line x1="780" y1="365" x2="780" y2="345" class="wire-12v"/>
-  <text x="785" y="345" class="pin">+12V</text>
-  <line x1="780" y1="365" x2="800" y2="365" class="wire-12v"/>
-  <line x1="780" y1="405" x2="800" y2="395" class="wire-signal"/>
-  <text x="755" y="402" class="pin">PWM</text>
-  <line x1="820" y1="405" x2="820" y2="425" class="wire-gnd"/>
-  <line x1="820" y1="425" x2="660" y2="425" class="wire-gnd"/>
+  <line x1="882" y1="172" x2="915" y2="172" class="wire5"/>
+  <line x1="915" y1="172" x2="915" y2="352" class="wire5"/>
+  <line x1="915" y1="352" x2="950" y2="352" class="wire5"/>
 
-  <!-- ====== LED RGB ====== -->
-  <rect x="780" y="450" width="160" height="80" class="ic" fill="#fec"/>
-  <text x="860" y="470" text-anchor="middle" class="label">WS2812 / WS2812B</text>
-  <text x="860" y="488" text-anchor="middle" font-size="9">1× onboard +</text>
-  <text x="860" y="502" text-anchor="middle" font-size="9">strip externa opcional</text>
-  <text x="860" y="518" text-anchor="middle" font-size="9" fill="#a00">DIN ← GPIO 21</text>
-  <line x1="780" y1="405" x2="780" y2="450" class="wire-signal"/>
+  <line x1="882" y1="192" x2="935" y2="192" class="wiregnd"/>
+  <line x1="935" y1="192" x2="935" y2="375" class="wiregnd"/>
+  <line x1="935" y1="375" x2="950" y2="375" class="wiregnd"/>
 
-  <!-- ====== LEGENDA ====== -->
-  <rect x="30" y="560" width="940" height="120" fill="#fafafa" stroke="#999"/>
-  <text x="40" y="580" class="label">LEGENDA:</text>
-  <line x1="120" y1="577" x2="160" y2="577" class="wire-power"/>
-  <text x="170" y="582" font-size="10">+24V (potência principal)</text>
-  <line x1="320" y1="577" x2="360" y2="577" class="wire-12v"/>
-  <text x="370" y="582" font-size="10">+12V (fan)</text>
-  <line x1="450" y1="577" x2="490" y2="577" class="wire-5v"/>
-  <text x="500" y="582" font-size="10">+5V (ESP32)</text>
-  <line x1="580" y1="577" x2="620" y2="577" class="wire-signal"/>
-  <text x="630" y="582" font-size="10">Sinal de controle</text>
-  <line x1="750" y1="577" x2="790" y2="577" class="wire-gnd"/>
-  <text x="800" y="582" font-size="10">GND comum</text>
+  <!-- GPIO5 (PWM) para FAN -->
+  <line x1="950" y1="453" x2="700" y2="453" class="wiresig"/>
+  <line x1="700" y1="453" x2="700" y2="385" class="wiresig"/>
+  <line x1="700" y1="385" x2="630" y2="385" class="wiresig" marker-end="url(#arrow)"/>
+  <!-- NTC -->
+  <rect x="940" y="560" width="200" height="120" class="sensor"/>
+  <text x="1040" y="585" text-anchor="middle" class="label">NTC 100K B3950</text>
+  <text x="1040" y="602" text-anchor="middle" class="pin">Divisor + filtro</text>
+  <text x="950" y="625" class="pin">3V3 - R100K - GPIO1</text>
+  <text x="950" y="643" class="pin">      - NTC - GND</text>
+  <text x="950" y="661" class="pin">      - C100nF - GND</text>
+  <text x="1040" y="676" text-anchor="middle" class="warn">Sonda no eixo do motor</text>
 
-  <text x="40" y="605" font-size="10" font-weight="bold">FAIL-SAFE LOGIC:</text>
-  <text x="40" y="620" font-size="10">• Relé NC: sem energia na bobina = motor LIGADO. Se ESP32 trava, motor continua funcionando.</text>
-  <text x="40" y="635" font-size="10">• Pull-down 10kΩ no gate: garante MOSFET OFF se GPIO ficar flutuante.</text>
-  <text x="40" y="650" font-size="10">• Diodo 1N4007 antiparalelo na bobina: protege MOSFET do spike de 200V+ ao desligar.</text>
-  <text x="40" y="665" font-size="10">• Boot do ESP32: relé inicia desligado, habilita após 2s (teste fan 100%).</text>
+  <line x1="950" y1="407" x2="900" y2="407" class="wiresig"/>
+  <line x1="900" y1="407" x2="900" y2="585" class="wiresig"/>
+  <line x1="900" y1="585" x2="940" y2="585" class="wiresig" marker-end="url(#arrow)"/>
+
+  <!-- MOSFET -->
+  <rect x="450" y="450" width="280" height="150" class="block"/>
+  <text x="590" y="478" text-anchor="middle" class="label">Driver MOSFET — IRLZ44N</text>
+  <text x="590" y="505" text-anchor="middle" class="pin">GPIO4 ── R 220Ω ── Gate</text>
+  <text x="590" y="525" text-anchor="middle" class="pin">Gate  ── R 10K  ── GND  (pulldown)</text>
+  <text x="590" y="545" text-anchor="middle" class="pin">Source = GND</text>
+  <text x="590" y="565" text-anchor="middle" class="pin">Drain  = Coil- (rele)</text>
+  <text x="590" y="588" text-anchor="middle" class="warn">Logic-level: aciona com 3V3</text>
+
+  <line x1="950" y1="430" x2="730" y2="430" class="wiresig"/>
+  <line x1="730" y1="430" x2="730" y2="500" class="wiresig"/>
+  <line x1="730" y1="500" x2="730" y2="500" class="wiresig" marker-end="url(#arrow)"/>
+
+  <!-- RELE -->
+  <rect x="60" y="450" width="220" height="170" class="relay"/>
+  <text x="170" y="478" text-anchor="middle" class="label">Rele Songle SLA-24VDC-SL-C</text>
+  <text x="170" y="495" text-anchor="middle" class="pin">SPDT 30A — Modo NC</text>
+  <text x="75" y="525" class="pin">Coil+ ── +12V (Buck #1)</text>
+  <text x="75" y="545" class="pin">Coil- ── Drain MOSFET</text>
+  <text x="75" y="572" class="pin">COM   ── AC do ODESC</text>
+  <text x="75" y="590" class="pin">NC    ── Motor (fail-safe)</text>
+  <text x="75" y="608" class="pin">NO    ── (nao conectar)</text>
+
+  <!-- Aviso do diodo flyback (FORA da caixa do MOSFET) -->
+  <rect x="60" y="395" width="220" height="40" fill="#fff9c4" stroke="#f9a825" stroke-width="1.5" rx="4"/>
+  <text x="170" y="415" text-anchor="middle" class="warn">⚠ Diodo 1N4007 em paralelo com a bobina</text>
+  <text x="170" y="428" text-anchor="middle" class="pin">Catodo no Coil+ • Anodo no Coil-</text>
+
+  <!-- Coil power: +12V do Buck #1 vai pra Coil+ -->
+  <line x1="660" y1="172" x2="660" y2="260" class="wire12"/>
+  <line x1="660" y1="260" x2="280" y2="260" class="wire12"/>
+  <line x1="280" y1="260" x2="280" y2="525" class="wire12" marker-end="url(#arrow)"/>
+
+  <!-- Coil-: do Drain do MOSFET pra bobina -->
+  <line x1="450" y1="545" x2="280" y2="545" class="wiresig" marker-end="url(#arrow)"/>
+
+  <!-- SAIDA AC -->
+  <rect x="60" y="680" width="500" height="90" class="block"/>
+  <text x="310" y="708" text-anchor="middle" class="label">Saida AC do Motor (chaveada pelo rele NC)</text>
+  <text x="310" y="730" text-anchor="middle" class="pin">ODESC.AC ── COM (rele) ── NC ── Motor Hoverboard 15Nm</text>
+  <text x="310" y="752" text-anchor="middle" class="warn">SHUTDOWN: ESP energiza bobina → contato abre → motor desliga</text>
+
+  <line x1="170" y1="620" x2="170" y2="680" class="wireac"/>
+
+  <!-- LEGENDA -->
+  <rect x="940" y="700" width="320" height="100" fill="#fafafa" stroke="#bdbdbd" stroke-width="1" rx="6"/>
+  <text x="1100" y="722" text-anchor="middle" class="label">Legenda</text>
+
+  <line x1="955" y1="740" x2="985" y2="740" class="wire24"/>
+  <text x="995" y="744" class="legend">24V</text>
+  <line x1="1055" y1="740" x2="1085" y2="740" class="wire12"/>
+  <text x="1095" y="744" class="legend">12V</text>
+  <line x1="1155" y1="740" x2="1185" y2="740" class="wire5"/>
+  <text x="1195" y="744" class="legend">5V</text>
+
+  <line x1="955" y1="765" x2="985" y2="765" class="wiregnd"/>
+  <text x="995" y="769" class="legend">GND</text>
+  <line x1="1055" y1="765" x2="1085" y2="765" class="wiresig"/>
+  <text x="1095" y="769" class="legend">Sinal 3V3</text>
+  <line x1="1155" y1="765" x2="1185" y2="765" class="wireac"/>
+  <text x="1195" y="769" class="legend">AC motor</text>
+
+  <text x="1100" y="790" text-anchor="middle" class="pin" fill="#666">v3.4.0 — MIT License</text>
 </svg>
