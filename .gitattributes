@@ -1,0 +1,26 @@
+# Auto-detect text files e normaliza line endings
+* text=auto eol=lf
+
+# Forca LF nestes (mesmo no Windows)
+*.md       text eol=lf
+*.txt      text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.json     text eol=lf
+*.ino      text eol=lf
+*.h        text eol=lf
+*.cpp      text eol=lf
+*.c        text eol=lf
+*.csv      text eol=lf
+*.svg      text eol=lf
+
+# Binarios (nao aplicar conversao)
+*.fzz      binary
+*.fz       binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.pdf      binary
+*.zip      binary
+*.bin      binary
+*.kicad_*  binary
