@@ -95,3 +95,11 @@ scripts/*.ps1.bak
 **/.history/
 .backup/
 **/.backup/
+# ═══════════════════════════════════════════════════════════
+# 🔧 Arduino IDE — duplicatas e backups acidentais
+# ═══════════════════════════════════════════════════════════
+*.ino.txt
+src/**/*.ino.txt
+*.ino.bak
+*.ino.orig
+build/
