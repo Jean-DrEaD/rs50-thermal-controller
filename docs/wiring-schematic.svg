@@ -50,18 +50,22 @@
   <text x="540" y="124" text-anchor="middle" class="pin">LM2596 24V para 12V</text>
   <text x="540" y="140" text-anchor="middle" class="pin">3A - Ajustar Vout=12.0V</text>
   <text x="468" y="175" class="pin">IN+</text>
-  <text x="468" y="195" class="pin">IN-</text>
+  <text x="468" y="200" class="pin">IN-</text>
   <text x="592" y="175" class="pin">OUT+</text>
-  <text x="592" y="195" class="pin">OUT-</text>
+  <text x="592" y="200" class="pin">OUT-</text>
   <circle cx="458" cy="172" r="3" fill="#d32f2f"/>
-  <circle cx="458" cy="192" r="3" fill="#212121"/>
+  <circle cx="458" cy="197" r="3" fill="#212121"/>
   <circle cx="622" cy="172" r="3" fill="#f57c00"/>
-  <circle cx="622" cy="192" r="3" fill="#212121"/>
+  <circle cx="622" cy="197" r="3" fill="#212121"/>
 
+  <!-- 24V: XT60 -> Buck#1 IN+ -->
   <line x1="290" y1="195" x2="290" y2="172" class="wire24"/>
   <line x1="290" y1="172" x2="458" y2="172" class="wire24"/>
-  <line x1="370" y1="195" x2="370" y2="192" class="wiregnd"/>
-  <line x1="370" y1="192" x2="458" y2="192" class="wiregnd"/>
+
+  <!-- GND backbone descendo abaixo dos labels (y=235) -->
+  <line x1="370" y1="195" x2="370" y2="235" class="wiregnd"/>
+  <line x1="370" y1="235" x2="458" y2="235" class="wiregnd"/>
+  <line x1="458" y1="235" x2="458" y2="197" class="wiregnd"/>
 
   <!-- HW-411 #2 -->
   <rect x="710" y="80" width="180" height="130" class="power"/>
@@ -69,32 +73,39 @@
   <text x="800" y="124" text-anchor="middle" class="pin">LM2596 12V para 5V</text>
   <text x="800" y="140" text-anchor="middle" class="pin">1A - Ajustar Vout=5.0V</text>
   <text x="728" y="175" class="pin">IN+</text>
-  <text x="728" y="195" class="pin">IN-</text>
+  <text x="728" y="200" class="pin">IN-</text>
   <text x="852" y="175" class="pin">OUT+</text>
-  <text x="852" y="195" class="pin">OUT-</text>
+  <text x="852" y="200" class="pin">OUT-</text>
   <circle cx="718" cy="172" r="3" fill="#f57c00"/>
-  <circle cx="718" cy="192" r="3" fill="#212121"/>
+  <circle cx="718" cy="197" r="3" fill="#212121"/>
   <circle cx="882" cy="172" r="3" fill="#fbc02d"/>
-  <circle cx="882" cy="192" r="3" fill="#212121"/>
+  <circle cx="882" cy="197" r="3" fill="#212121"/>
 
+  <!-- 12V: Buck#1 OUT+ -> Buck#2 IN+ -->
   <line x1="622" y1="172" x2="718" y2="172" class="wire12"/>
-  <line x1="622" y1="192" x2="718" y2="192" class="wiregnd"/>
+
+  <!-- GND continua: Buck#1 IN- -> Buck#2 IN- (passa em y=235) -->
+  <line x1="622" y1="197" x2="622" y2="235" class="wiregnd"/>
+  <line x1="622" y1="235" x2="718" y2="235" class="wiregnd"/>
+  <line x1="718" y1="235" x2="718" y2="197" class="wiregnd"/>
 
   <!-- FAN -->
-  <rect x="450" y="280" width="180" height="110" class="block"/>
-  <text x="540" y="305" text-anchor="middle" class="label">FAN 120mm 4-pin</text>
-  <text x="540" y="322" text-anchor="middle" class="pin">12V Intel-style PWM</text>
-  <text x="475" y="350" class="pin">+12V (amarelo)</text>
-  <text x="475" y="368" class="pin">GND  (preto)</text>
-  <text x="540" y="385" text-anchor="middle" class="warn">PWM (azul) - GPIO5    TACH (verde) X</text>
+  <rect x="450" y="290" width="180" height="120" class="block"/>
+  <text x="540" y="315" text-anchor="middle" class="label">FAN 120mm 4-pin</text>
+  <text x="540" y="332" text-anchor="middle" class="pin">12V Intel-style PWM</text>
+  <text x="475" y="358" class="pin">+12V (amarelo)</text>
+  <text x="475" y="376" class="pin">GND  (preto)</text>
+  <text x="475" y="394" class="warn">PWM (azul) - GPIO5</text>
+  <text x="540" y="406" text-anchor="middle" class="warn">TACH (verde) NAO USAR</text>
 
-  <line x1="622" y1="172" x2="660" y2="172" class="wire12"/>
-  <line x1="660" y1="172" x2="660" y2="350" class="wire12"/>
-  <line x1="660" y1="350" x2="475" y2="350" class="wire12"/>
+  <!-- 12V para Fan: desce do backbone Buck#1 OUT+ -->
+  <line x1="660" y1="172" x2="660" y2="358" class="wire12"/>
+  <line x1="660" y1="358" x2="595" y2="358" class="wire12" marker-end="url(#arrow)"/>
 
-  <line x1="622" y1="192" x2="425" y2="192" class="wiregnd"/>
-  <line x1="425" y1="192" x2="425" y2="368" class="wiregnd"/>
-  <line x1="425" y1="368" x2="475" y2="368" class="wiregnd"/>
+  <!-- GND para Fan: usa backbone -->
+  <line x1="425" y1="235" x2="425" y2="376" class="wiregnd"/>
+  <line x1="425" y1="376" x2="470" y2="376" class="wiregnd" marker-end="url(#arrow)"/>
+  <line x1="370" y1="235" x2="425" y2="235" class="wiregnd"/>
 
   <!-- ESP32-S3-ZERO -->
   <rect x="940" y="280" width="200" height="240" class="mcu"/>
@@ -113,18 +124,21 @@
   <circle cx="950" cy="453" r="3" fill="#1976d2"/>
   <circle cx="950" cy="476" r="3" fill="#1976d2"/>
 
+  <!-- 5V: Buck#2 OUT+ -> ESP32 5V -->
   <line x1="882" y1="172" x2="915" y2="172" class="wire5"/>
   <line x1="915" y1="172" x2="915" y2="352" class="wire5"/>
   <line x1="915" y1="352" x2="950" y2="352" class="wire5"/>
 
-  <line x1="882" y1="192" x2="935" y2="192" class="wiregnd"/>
-  <line x1="935" y1="192" x2="935" y2="375" class="wiregnd"/>
+  <!-- GND para ESP32 -->
+  <line x1="882" y1="235" x2="935" y2="235" class="wiregnd"/>
+  <line x1="882" y1="197" x2="882" y2="235" class="wiregnd"/>
+  <line x1="935" y1="235" x2="935" y2="375" class="wiregnd"/>
   <line x1="935" y1="375" x2="950" y2="375" class="wiregnd"/>
 
-  <!-- GPIO5 (PWM) para FAN -->
+  <!-- GPIO5 (PWM) -> Fan PWM -->
   <line x1="950" y1="453" x2="700" y2="453" class="wiresig"/>
-  <line x1="700" y1="453" x2="700" y2="385" class="wiresig"/>
-  <line x1="700" y1="385" x2="630" y2="385" class="wiresig" marker-end="url(#arrow)"/>
+  <line x1="700" y1="453" x2="700" y2="394" class="wiresig"/>
+  <line x1="700" y1="394" x2="630" y2="394" class="wiresig" marker-end="url(#arrow)"/>
   <!-- NTC -->
   <rect x="940" y="560" width="200" height="120" class="sensor"/>
   <text x="1040" y="585" text-anchor="middle" class="label">NTC 100K B3950</text>
@@ -134,22 +148,24 @@
   <text x="950" y="661" class="pin">      - C100nF - GND</text>
   <text x="1040" y="676" text-anchor="middle" class="warn">Sonda no eixo do motor</text>
 
+  <!-- GPIO1 -> NTC: rota limpa pela direita -->
   <line x1="950" y1="407" x2="900" y2="407" class="wiresig"/>
   <line x1="900" y1="407" x2="900" y2="585" class="wiresig"/>
-  <line x1="900" y1="585" x2="940" y2="585" class="wiresig" marker-end="url(#arrow)"/>
+  <line x1="900" y1="585" x2="935" y2="585" class="wiresig" marker-end="url(#arrow)"/>
 
   <!-- MOSFET -->
-  <rect x="450" y="450" width="280" height="150" class="block"/>
+  <rect x="450" y="450" width="280" height="170" class="block"/>
   <text x="590" y="478" text-anchor="middle" class="label">Driver MOSFET — IRLZ44N</text>
-  <text x="590" y="505" text-anchor="middle" class="pin">GPIO4 ── R 220Ω ── Gate</text>
-  <text x="590" y="525" text-anchor="middle" class="pin">Gate  ── R 10K  ── GND  (pulldown)</text>
-  <text x="590" y="545" text-anchor="middle" class="pin">Source = GND</text>
-  <text x="590" y="565" text-anchor="middle" class="pin">Drain  = Coil- (rele)</text>
-  <text x="590" y="588" text-anchor="middle" class="warn">Logic-level: aciona com 3V3</text>
+  <text x="590" y="505" text-anchor="middle" class="pin">GPIO4  ──  R 220Ω  ──  Gate</text>
+  <text x="590" y="525" text-anchor="middle" class="pin">Gate   ──  R 10K   ──  GND  (pulldown)</text>
+  <text x="590" y="548" text-anchor="middle" class="pin">Source = GND</text>
+  <text x="590" y="568" text-anchor="middle" class="pin">Drain  = Coil- do rele</text>
+  <text x="590" y="595" text-anchor="middle" class="warn">Logic-level: aciona com 3V3</text>
 
-  <line x1="950" y1="430" x2="730" y2="430" class="wiresig"/>
-  <line x1="730" y1="430" x2="730" y2="500" class="wiresig"/>
-  <line x1="730" y1="500" x2="730" y2="500" class="wiresig" marker-end="url(#arrow)"/>
+  <!-- GPIO4 -> MOSFET (entra exatamente na borda direita da caixa em y=505) -->
+  <line x1="950" y1="430" x2="800" y2="430" class="wiresig"/>
+  <line x1="800" y1="430" x2="800" y2="505" class="wiresig"/>
+  <line x1="800" y1="505" x2="734" y2="505" class="wiresig" marker-end="url(#arrow)"/>
 
   <!-- RELE -->
   <rect x="60" y="450" width="220" height="170" class="relay"/>
@@ -161,18 +177,21 @@
   <text x="75" y="590" class="pin">NC    ── Motor (fail-safe)</text>
   <text x="75" y="608" class="pin">NO    ── (nao conectar)</text>
 
-  <!-- Aviso do diodo flyback (FORA da caixa do MOSFET) -->
+  <!-- Aviso do diodo flyback -->
   <rect x="60" y="395" width="220" height="40" fill="#fff9c4" stroke="#f9a825" stroke-width="1.5" rx="4"/>
-  <text x="170" y="415" text-anchor="middle" class="warn">⚠ Diodo 1N4007 em paralelo com a bobina</text>
-  <text x="170" y="428" text-anchor="middle" class="pin">Catodo no Coil+ • Anodo no Coil-</text>
+  <text x="170" y="412" text-anchor="middle" class="warn">⚠ Diodo 1N4007 em paralelo com a bobina</text>
+  <text x="170" y="426" text-anchor="middle" class="pin">Catodo no Coil+ • Anodo no Coil-</text>
 
-  <!-- Coil power: +12V do Buck #1 vai pra Coil+ -->
-  <line x1="660" y1="172" x2="660" y2="260" class="wire12"/>
-  <line x1="660" y1="260" x2="280" y2="260" class="wire12"/>
-  <line x1="280" y1="260" x2="280" y2="525" class="wire12" marker-end="url(#arrow)"/>
+  <!-- 12V para Coil+: vem do backbone do Buck#1 -->
+  <line x1="660" y1="270" x2="40" y2="270" class="wire12"/>
+  <line x1="40" y1="270" x2="40" y2="525" class="wire12"/>
+  <line x1="40" y1="525" x2="68" y2="525" class="wire12" marker-end="url(#arrow)"/>
+  <line x1="660" y1="172" x2="660" y2="270" class="wire12"/>
 
-  <!-- Coil-: do Drain do MOSFET pra bobina -->
-  <line x1="450" y1="545" x2="280" y2="545" class="wiresig" marker-end="url(#arrow)"/>
+  <!-- Coil-: do Drain do MOSFET -->
+  <line x1="450" y1="568" x2="370" y2="568" class="wiresig"/>
+  <line x1="370" y1="568" x2="370" y2="545" class="wiresig"/>
+  <line x1="370" y1="545" x2="280" y2="545" class="wiresig" marker-end="url(#arrow)"/>
 
   <!-- SAIDA AC -->
   <rect x="60" y="680" width="500" height="90" class="block"/>
