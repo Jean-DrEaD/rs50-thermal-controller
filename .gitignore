@@ -1,35 +1,90 @@
-# ===== KiCad =====
-*.kicad_sch.backup
-*.kicad_sch.backup_*
-*.kicad_pcb.backup
-*.kicad_pcb.backup_*
+# ─────────────────────────────────────────────────────────────
+# RS50 Thermal Controller — .gitignore
+# Atualizado: 2026-05 (KiCad abandonado, Fritzing oficial)
+# ─────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════
+# 🚫 KiCad — ABANDONADO (use Fritzing como fonte oficial)
+# ═══════════════════════════════════════════════════════════
+*.bak
+*.bck
+*.kicad_pcb-bak
+*.kicad_sch-bak
 *-backups/
-.backup/
+*-cache*
+*-bak
+*~
+~*
 _autosave-*
-*.lck
+\#auto_saved_files\#
+*.tmp
+*-save.pro
+*-save.kicad_pcb
+fp-info-cache
 ~*.lck
+*.net
+*.dsn
+*.ses
 *.kicad_prl
+**/*-backups/*.zip
 
-# ===== Build outputs =====
-hardware/gerbers/
-hardware/production/
+# ═══════════════════════════════════════════════════════════
+# 🎨 Fritzing — fonte oficial (mantém .fzz versionado)
+# ═══════════════════════════════════════════════════════════
+*.fz.bak
+*.fzz.bak
+backup/
+**/extracted/
+**/Diagram/
 
-# ===== Scripts temporarios =====
-create-schematic.ps1
-schematic-builder.ps1
-schematic-data.ps1
-setup-repo.ps1
-
-# ===== VS Code Local History =====
-.history/
-hardware/.history/
-**/.history/
-
-# ===== Arduino =====
-src/**/*.ino.txt
+# ═══════════════════════════════════════════════════════════
+# 💻 Arduino / PlatformIO
+# ═══════════════════════════════════════════════════════════
+*.elf
+*.hex
+*.map
+*.eep
+build/
 .pio/
+.pioenvs/
+.piolibdeps/
 
-# ===== OS =====
+# ═══════════════════════════════════════════════════════════
+# 🔐 Secrets — NUNCA commitar credenciais
+# ═══════════════════════════════════════════════════════════
+src/**/secrets.h
+src/**/credentials.h
+*.env
+.env.local
+
+# ═══════════════════════════════════════════════════════════
+# 🖥️ Sistema operacional
+# ═══════════════════════════════════════════════════════════
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
 .DS_Store
-desktop.ini
+.AppleDouble
+.LSOverride
+._*
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ═══════════════════════════════════════════════════════════
+# 📝 Editores
+# ═══════════════════════════════════════════════════════════
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+
+# ═══════════════════════════════════════════════════════════
+# 🤖 Scripts antigos (ignora, nao apaga do disco)
+# ═══════════════════════════════════════════════════════════
+scripts/create-schematic.ps1
+scripts/schematic-builder.ps1
+scripts/*.ps1.bak
