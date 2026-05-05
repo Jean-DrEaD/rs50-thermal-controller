@@ -88,3 +88,10 @@ $RECYCLE.BIN/
 scripts/create-schematic.ps1
 scripts/schematic-builder.ps1
 scripts/*.ps1.bak
+# ═══════════════════════════════════════════════════════════
+# 📜 VS Code Local History (extensao xyz.local-history)
+# ═══════════════════════════════════════════════════════════
+.history/
+**/.history/
+.backup/
+**/.backup/
