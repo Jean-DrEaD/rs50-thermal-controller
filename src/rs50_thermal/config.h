@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════════════════════
 //  RS50 Thermal Controller — config.h
-//  Version: 3.3.0 (FINAL)
+//  Version: 3.3.5
 //  Author: DrEaD (Joinville/SC)
 //  Hardware: ESP32-S3-Zero Waveshare + NTC 100K B3950 + Songle SLA-24VDC-SL-C
 //  Target: Volante DD RS50 Clone + Hoverboard 15Nm + ODESC FFBeast
@@ -9,7 +9,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define FW_VERSION "3.3.2"
+#define FW_VERSION "3.3.5"
 #define FW_NAME    "RS50-Thermal"
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -121,11 +121,11 @@
 #define SERIAL_BAUD       115200
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  PWM HARDWARE
+//  PWM HARDWARE (ESP32 LEDC — Arduino Core 2.0.x)
 // ═══════════════════════════════════════════════════════════════════════════
-#define PWM_FREQ          25000    // Acima do audível
-#define PWM_RESOLUTION    8
-#define PWM_CHANNEL       0
+#define PWM_FREQ          25000    // 25kHz — acima do audível
+#define PWM_RESOLUTION    8        // 8 bits → duty 0..255
+#define PWM_CHANNEL_FAN   0        // Canal LEDC dedicado ao fan
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  WIFI / DASHBOARD

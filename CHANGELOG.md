@@ -3,25 +3,49 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.5] — 2026-05-06
+
+### Fixed
+- **`config.h` faltando `PWM_CHANNEL_FAN`**: o `.ino` da v3.3.4 referenciava
+  `PWM_CHANNEL_FAN` mas o header só definia `PWM_CHANNEL`. Build do CI
+  falhava com `'PWM_CHANNEL_FAN' was not declared`. Renomeado o define
+  para o nome usado no firmware.
+- **Versão dessincronizada no `config.h`**:
+  - Comentário do header dizia `Version: 3.3.0 (FINAL)` → atualizado para `3.3.5`.
+  - `FW_VERSION` estava em `"3.3.2"` (defasado) → atualizado para `"3.3.5"`.
+- **`README.md`**: seção "Estrutura do repositório" mencionava
+  `docs/wiring-schematic-v3.3.1.svg` (deletado) e diretórios inexistentes
+  (`firmware/`, `platformio.ini`). Atualizada para refletir a estrutura
+  real do repo.
+
+### Changed
+- `.ino` header bumpado para `v3.3.5`.
+
 ## [3.3.4] — 2026-05-06
 
 ### Fixed
-- **Firmware corrigido de fato**: a v3.3.3 havia documentado a correção
-  do `ledcAttach` mas o `.ino` não tinha sido editado. Agora as 4
-  ocorrências estão migradas:
-  - `ledcAttach()` → `ledcSetup()` + `ledcAttachPin()`
-  - `ledcWrite(PIN_PWM, ...)` → `ledcWrite(PWM_CHANNEL_FAN, ...)`
-  - Constante `PWM_CHANNEL_FAN = 0` adicionada.
-- **Link da imagem no README**: apontava para
-  `docs/wiring-schematic-v3.3.1.svg` (deletado). Corrigido para
-  `docs/wiring-schematic.svg`.
+- **Patches do `.ino` aplicados de fato** (a v3.3.3 documentou mas não
+  modificou o código). Confirmadas as 4 ocorrências com nova API:
+  - `ledcSetup()` + `ledcAttachPin()` no setup
+  - 3× `ledcWrite(PWM_CHANNEL_FAN, ...)` em vez de `PIN_PWM`
+- **Comentários enganosos**: removidas referências a "Core 3.x" no
+  header e na seção de ADC. Agora declaram corretamente Core 2.0.x.
+- **`getStateColor()` e `getStateBrightness()`**: adicionado `default`
+  em todos os switches (elimina warnings do compilador).
+- **`printTelemetry()`**: variáveis `state` e `icon` agora inicializadas
+  (defesa contra UB se enum crescer no futuro).
+- **`renderLEDs_Bar()`**: adicionados guards `if (LED_COUNT >= N)` antes
+  de acessar `leds[1]` e `leds[2]`.
+- **Footer do dashboard HTML**: agora usa versão dinâmica via WebSocket
+  em vez de string hardcoded `v3.3.0`.
+- **README**: link da imagem corrigido (apontava para SVG deletado).
 
 ### Changed
-- `docs/wiring-schematic.svg` agora é o **export oficial do Fritzing**
-  (substitui o SVG sintético gerado anteriormente).
+- `docs/wiring-schematic.svg`: substituído pelo **export oficial do
+  Fritzing** (~1.87 MB, breadboard view fiel à montagem física).
 
-### Restored
-- `CONTEXT.md` (versão resumida de 1 página).
+### Removed
+- `docs/wiring-schematic-v3.3.1.svg` (substituído pelo Fritzing).
 
 ## [3.3.3] — 2026-05-06
 

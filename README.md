@@ -188,20 +188,14 @@ sequenceDiagram
 
 ```
 .
-├── README.md
-├── CHANGELOG.md
-├── CONTEXT.md
 ├── docs/
-│   ├── wiring-schematic-v3.3.1.svg
-│   ├── fritzing/
-│   │   └── rs50-thermal.fzz
-│   └── photos/
-├── firmware/
-│   ├── platformio.ini
-│   └── src/
-│       └── main.cpp
-└── hardware/
-    └── bom.csv
+│   └── wiring-schematic.svg     ← export Fritzing
+├── src/
+│   └── rs50_thermal/
+│       ├── rs50_thermal.ino     ← firmware principal
+│       └── config.h             ← pinout + thresholds
+├── hardware/                    ← KiCad PCB
+└── .github/workflows/           ← CI (compile firmware)
 ```
 
 ## 📜 Licença

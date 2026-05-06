@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════
-//  RS50 Thermal Controller v3.3.4
+//  RS50 Thermal Controller v3.3.5
 //
 //  Hardware:
 //    - ESP32-S3-Zero (Waveshare)
