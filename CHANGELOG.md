@@ -3,6 +3,24 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.2] — 2026-05-06
+
+### Changed
+- **Schematic substituído pelo diagrama Fritzing** (`docs/wiring-diagram.svg`).
+  O SVG sintético gerado anteriormente foi descartado em favor do export
+  fiel ao breadboard real.
+
+### Removed
+- `docs/wiring-schematic-v3.3.1.svg` (substituído).
+- `CONTEXT.md` (consolidado dentro do README).
+- `setup-repo.ps1` e `update-repo.ps1` (scripts locais, não versionar).
+
+### Fixed
+- **Workflow CI/Compile firmware**: erro `'ledcAttach' was not declared`
+  corrigido. Substituído `ledcAttach(pin, freq, res)` (API v3.x) por
+  `ledcSetup(ch, freq, res)` + `ledcAttachPin(pin, ch)` (API v2.x),
+  compatível com `esp32:esp32@2.0.14` usado no workflow.
+
 ## [3.3.1] — 2026-05-06
 
 ### Fixed

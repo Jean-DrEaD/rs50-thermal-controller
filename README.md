@@ -9,6 +9,8 @@ de hoverboard (15Nm) acionado por placa MKS XDrive Mini 1.0
 > conscientemente decide cortar.
 
 ![Wiring Schematic](docs/wiring-schematic-v3.3.1.svg)
+> 📐 Diagrama de breadboard exportado do Fritzing — mostra o layout físico real da montagem.
+> Para o detalhamento lógico do circuito, ver os diagramas Mermaid abaixo.
 
 ## ✨ Features
 
