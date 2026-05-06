@@ -1,87 +1,50 @@
 # Changelog
 
-Todas as mudanças notáveis neste projeto serão documentadas aqui.
+Todas as mudanças relevantes deste projeto são documentadas aqui.
+Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
-O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
-e o projeto adere a [Semantic Versioning](https://semver.org/lang/pt-BR/).
+## [3.3.1] — 2026-05-06
 
-## [Unreleased]
+### Fixed
+- **Polaridade do diodo flyback 1N4007**: documentação visual corrigida e validada.
+  Cátodo (faixa) no lado **+24V/B1/COM**, anodo no lado **Drain/B2**.
+  (O diodo físico já estava correto desde o início; apenas a leitura do
+  schematic em revisão estava ambígua.)
+- Labels `Anodo` / `Katodo` adicionados ao Fritzing para evitar futura
+  confusão visual.
+- Labels `B1=VCC` / `B2=VAI PRO DRAIN` no relé Songle para deixar
+  explícito o sentido da bobina.
 
-### Planejado
-- OTA updates via WiFi
-- Configuração via dashboard web
-- Histórico CSV em SPIFFS
-- API REST `/api/status`, `/api/config`
-- MQTT integration (Home Assistant)
+### Added
+- Novo `docs/wiring-schematic-v3.3.1.svg` (versão definitiva, renderiza
+  nativo no GitHub).
+- Seção **"Lógica fail-safe"** dentro do próprio SVG.
+- Seção **"Como funciona o flyback diode"** no README.
+- Mnemônico **"K = Katodo = faixa"** documentado no README como
+  aprendizado do projeto.
 
----
+### Changed
+- `README.md` reescrito com fluxo de operação em 3 estados
+  (repouso / shutdown / desligamento do MOSFET).
+- `CONTEXT.md` atualizado com decisões de hardware fechadas.
 
-## [3.3.0] - 2026-05-01
+## [3.3.0] — 2026-05-05
 
-### ✨ Adicionado
-- Suporte a múltiplos LEDs WS2812 (1, 3, 5+ configurável)
-  - **Single mode**: 1 LED com cor por estado
-  - **Bar mode**: 3-4 LEDs ([estado][temperatura][fan][pico])
-  - **Thermometer mode**: 5+ LEDs em gradiente vertical
-- Reconexão automática WiFi a cada 30s
-- Indicador online/offline no dashboard
-- Pico de temperatura da sessão no dashboard
-- Versão do firmware exposta no dashboard
+### Added
+- Topologia **fail-safe** com relé Songle SLA-24VDC-SL-C em **NC**
+  (corta apenas +24V para a MKS; GND vai direto da fonte).
+- Driver do relé com IRLZ44N + 220Ω no gate + pull-down 10k + 1N4007.
+- Divisor NTC 100k B3950 com cap 100nF para GPIO1.
+- Fan 120mm 12V PWM nativo controlado por GPIO5 (3.3V direto).
+- WS2812 status no GPIO9 com 330Ω série.
 
-### 🔧 Modificado
-- `THERMAL_OFFSET` agora documentado para calibração
-- LED em estado NORMAL agora é praticamente invisível (brilho 3/255)
-- Estado CRITICAL pulsa a 2Hz (era estrobo rápido)
-- FAULT com grace period adaptativo:
-  - T<50°C → 60s tolerância
-  - T 50-55°C → 30s
-  - T>55°C → 5s
-- Cor LED corrigida para GRB (Waveshare WS2812B)
+### Changed
+- Migração do esquemático para SVG inline (descartado o Fritzing
+  como fonte da verdade — apenas referência de breadboard).
 
-### 🐛 Corrigido
-- Boot com fan em 100% por 2s para teste antes de habilitar relé
-- Pull-down 10kΩ no GPIO do relé previne acionamento durante reset
+## [3.2.0] — 2026-05-03
+- Cadeia de reguladores HW-411 (LM2596): 24V → 12V → 5V.
+- Mudança de DRV8871 para topologia de relé pelo critério fail-safe.
 
-### 📚 Documentação
-- Adicionado `docs/calibration-guide.md`
-- Adicionado `docs/wiring-schematic.svg`
-- Adicionado `hardware/bom.csv`
-- Adicionado workflows GitHub Actions
-
----
-
-## [3.2.0] - 2026-04-28
-
-### ✨ Adicionado
-- Dashboard WiFi com WebSocket em tempo real
-- Contador persistente de horas de uso (NVS)
-- FAULT inteligente com grace period
-
-### 🔧 Modificado
-- Migração para relé fail-safe NC (Songle SLA-24VDC-SL-C)
-- LED com brilho ajustável por estado
-
----
-
-## [3.1.0] - 2026-04-25
-
-### ✨ Adicionado
-- Estimativa adaptativa de temperatura do estator
-- Lead time para antecipar rampas térmicas
-- Detecção de falha do sensor (FAULT)
-
----
-
-## [3.0.0] - 2026-04-20
-
-### 🎉 Release Inicial
-- Controle PWM de fan baseado em NTC
-- Histerese para evitar oscilação
-- Filtro EMA para reduzir ruído
-- Telemetria via Serial
-
-[Unreleased]: https://github.com/Jean-DrEaD/rs50-thermal-controller/compare/v3.3.0...HEAD
-[3.3.0]: https://github.com/Jean-DrEaD/rs50-thermal-controller/releases/tag/v3.3.0
-[3.2.0]: https://github.com/Jean-DrEaD/rs50-thermal-controller/releases/tag/v3.2.0
-[3.1.0]: https://github.com/Jean-DrEaD/rs50-thermal-controller/releases/tag/v3.1.0
-[3.0.0]: https://github.com/Jean-DrEaD/rs50-thermal-controller/releases/tag/v3.0.0
+## [3.1.0] — 2026-05-01
+- Primeiro protótipo com ESP32-S3-Zero + NTC + cooler.
