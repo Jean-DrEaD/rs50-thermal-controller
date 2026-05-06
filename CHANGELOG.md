@@ -3,6 +3,26 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.3] — 2026-05-06
+
+### Fixed
+- **Firmware compila no CI**: substituído `ledcAttach()` (API ESP32 core 3.x)
+  por `ledcSetup()` + `ledcAttachPin()` (API core 2.x), compatível com
+  `esp32:esp32@2.0.14` usado no workflow.
+- Todas as chamadas `ledcWrite(PIN_PWM, ...)` migradas para
+  `ledcWrite(PWM_CHANNEL_FAN, ...)` conforme exigido pela API v2.x.
+- Adicionadas constantes `PWM_CHANNEL_FAN = 0`, `PWM_FREQ = 25000`,
+  `PWM_RESOLUTION = 8`.
+
+### Changed
+- Comentários do header do `.ino` atualizados para refletir core 2.0.14.
+
+### Restored
+- `CONTEXT.md` reintroduzido em versão **resumida** (uma página).
+
+### Removed
+- (mantém o que foi removido na 3.3.2: scripts locais).
+
 ## [3.3.2] — 2026-05-06
 
 ### Changed
