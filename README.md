@@ -8,7 +8,7 @@ de hoverboard (15Nm) acionado por placa MKS XDrive Mini 1.0
 > o motor continua funcionando. O corte só acontece quando o sistema
 > conscientemente decide cortar.
 
-![Wiring Schematic](docs/wiring-schematic-v3.3.1.svg)
+![Wiring Schematic](docs/wiring-schematic.svg)
 > 📐 Diagrama de breadboard exportado do Fritzing — mostra o layout físico real da montagem.
 > Para o detalhamento lógico do circuito, ver os diagramas Mermaid abaixo.
 
@@ -213,3 +213,4 @@ MIT — use, modifique, redistribua. Sem garantias.
 - Comunidade ODESC FFBeast pelo firmware da MKS.
 - Fritzing pela ferramenta de prototipagem.
 - Todos os tutoriais sobre flyback diodes que finalmente fizeram sentido. 🤝
+

@@ -3,6 +3,26 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.4] — 2026-05-06
+
+### Fixed
+- **Firmware corrigido de fato**: a v3.3.3 havia documentado a correção
+  do `ledcAttach` mas o `.ino` não tinha sido editado. Agora as 4
+  ocorrências estão migradas:
+  - `ledcAttach()` → `ledcSetup()` + `ledcAttachPin()`
+  - `ledcWrite(PIN_PWM, ...)` → `ledcWrite(PWM_CHANNEL_FAN, ...)`
+  - Constante `PWM_CHANNEL_FAN = 0` adicionada.
+- **Link da imagem no README**: apontava para
+  `docs/wiring-schematic-v3.3.1.svg` (deletado). Corrigido para
+  `docs/wiring-schematic.svg`.
+
+### Changed
+- `docs/wiring-schematic.svg` agora é o **export oficial do Fritzing**
+  (substitui o SVG sintético gerado anteriormente).
+
+### Restored
+- `CONTEXT.md` (versão resumida de 1 página).
+
 ## [3.3.3] — 2026-05-06
 
 ### Fixed

@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════
-//  RS50 Thermal Controller v3.3.1
+//  RS50 Thermal Controller v3.3.4
 //
 //  Hardware:
 //    - ESP32-S3-Zero (Waveshare)
@@ -18,11 +18,10 @@
 //    ✅ Reconexão automática WiFi
 //
 //  Compatibilidade:
-//    - ESP32 Arduino Core 3.x (ledcAttach, ADC_ATTENDB_MAX)
-//
-//  Bibliotecas necessárias:
-//    - FastLED (Daniel Garcia)
-//    - WebSockets (Markus Sattler)
+//    - Arduino IDE 2.x
+//    - ESP32 Arduino Core 2.0.14 (API ledcSetup + ledcAttachPin)
+//    - FastLED 3.6.x
+//    - WebSockets (Markus Sattler) 2.4.x
 //
 //  Licença: MIT
 // ════════════════════════════════════════════════════════════════════════════
@@ -208,7 +207,7 @@ void updateRelay() {
 void updatePWM() {
   if (thermalState >= THERMAL_CRITICAL) {
     pwmDuty = PWM_MAX;
-    ledcWrite(PIN_PWM, 255);
+    ledcWrite(PWM_CHANNEL_FAN, 255);
     return;
   }
   static float tempLastApplied = 25.0f;
@@ -220,7 +219,7 @@ void updatePWM() {
   else pwmDuty = PWM_MIN + (PWM_MAX - PWM_MIN) *
                   (temperature - TEMP_MIN) / (TEMP_MAX - TEMP_MIN);
   pwmDuty = constrain(pwmDuty, PWM_MIN, PWM_MAX);
-  ledcWrite(PIN_PWM, (pwmDuty * 255) / 100);
+  ledcWrite(PWM_CHANNEL_FAN, (pwmDuty * 255) / 100);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -235,8 +234,8 @@ CRGB getStateColor(ThermalState s) {
     case THERMAL_CRITICAL: return CRGB(255, 0, 0);
     case THERMAL_SHUTDOWN: return CRGB(255, 0, 0);
     case THERMAL_FAULT:    return CRGB(255, 0, 200);
+    default:               return CRGB::Black;
   }
-  return CRGB::Black;
 }
 
 uint8_t getStateBrightness(ThermalState s) {
@@ -244,6 +243,9 @@ uint8_t getStateBrightness(ThermalState s) {
     case THERMAL_NORMAL:  return LED_BRIGHTNESS_NORMAL;
     case THERMAL_WARMING:
     case THERMAL_WARNING: return LED_BRIGHTNESS_INFO;
+    case THERMAL_CRITICAL:
+    case THERMAL_SHUTDOWN:
+    case THERMAL_FAULT:   return LED_BRIGHTNESS_MAX;
     default:              return LED_BRIGHTNESS_MAX;
   }
 }
@@ -301,13 +303,17 @@ void renderLEDs_Bar() {
   leds[0].nscale8(getStateBrightness(thermalState));
 
   // LED 1: temperatura como gradiente
-  leds[1] = tempToColor(temperature);
-  leds[1].nscale8(LED_BRIGHTNESS_INFO);
+  if (LED_COUNT >= 2) {
+    leds[1] = tempToColor(temperature);
+    leds[1].nscale8(LED_BRIGHTNESS_INFO);
+  }
 
   // LED 2: PWM da fan (azul = baixo, branco = alto)
-  uint8_t fanBr = map(pwmDuty, PWM_MIN, PWM_MAX, 30, 255);
-  leds[2] = CRGB(fanBr, fanBr, 255);
-  leds[2].nscale8(LED_BRIGHTNESS_INFO);
+  if (LED_COUNT >= 3) {
+    uint8_t fanBr = map(pwmDuty, PWM_MIN, PWM_MAX, 30, 255);
+    leds[2] = CRGB(fanBr, fanBr, 255);
+    leds[2].nscale8(LED_BRIGHTNESS_INFO);
+  }
 
   // Se tiver 4º LED: pico da sessão
   if (LED_COUNT >= 4) {
@@ -319,7 +325,7 @@ void renderLEDs_Bar() {
   if (thermalState >= THERMAL_CRITICAL) {
     static bool flash = false;
     flash = !flash;
-    if (flash) for (int i=0; i<LED_COUNT; i++) leds[i] = CRGB::Red;
+    if (flash) for (int i = 0; i < LED_COUNT; i++) leds[i] = CRGB::Red;
   }
   FastLED.show();
 }
@@ -348,17 +354,15 @@ void renderLEDs_Thermometer() {
 
   // Estados altos: piscadas no LED do topo
   if (thermalState == THERMAL_CRITICAL) {
-    static bool flash = false;
-    if (now % 500 < 250) flash = true; else flash = false;
-    if (flash) leds[LED_COUNT-1] = CRGB::Red;
+    bool flash = (now % 500 < 250);
+    if (flash) leds[LED_COUNT - 1] = CRGB::Red;
   }
   if (thermalState == THERMAL_SHUTDOWN) {
-    static bool strobe = false;
-    if (now % 160 < 80) strobe = true; else strobe = false;
-    for (int i=0; i<LED_COUNT; i++) leds[i] = strobe ? CRGB::Red : CRGB::Black;
+    bool strobe = (now % 160 < 80);
+    for (int i = 0; i < LED_COUNT; i++) leds[i] = strobe ? CRGB::Red : CRGB::Black;
   }
   if (thermalState == THERMAL_FAULT) {
-    for (int i=0; i<LED_COUNT; i++) leds[i] = CRGB(255, 0, 200);
+    for (int i = 0; i < LED_COUNT; i++) leds[i] = CRGB(255, 0, 200);
     if ((now / 200) % 2) FastLED.clear();
   }
   FastLED.show();
@@ -450,7 +454,7 @@ h1{font-size:1.5em;margin-bottom:5px;color:#4af}
 <div class="card"><div class="card-label">Motor</div><div class="card-value" id="motor">--</div></div>
 <div class="card"><div class="card-label">Horas Totais</div><div class="card-value"><span id="hours">--</span><span class="card-unit">h</span></div></div>
 </div>
-<div class="footer">RS50 Thermal Controller v3.3.0 © 2026</div>
+<div class="footer">RS50 Thermal Controller v<span id="fwFooter">--</span> © 2026</div>
 </div>
 <script>
 let ws;
@@ -468,6 +472,7 @@ function connect(){
   ws.onmessage = (e) => {
     const d = JSON.parse(e.data);
     document.getElementById('fw').textContent = d.fw;
+    document.getElementById('fwFooter').textContent = d.fw;
     document.getElementById('state').textContent = d.state;
     document.getElementById('state').className = 'state ' + d.state;
     document.getElementById('tShaft').textContent = d.tShaft.toFixed(1);
@@ -547,18 +552,19 @@ void wifiReconnect() {
 // ════════════════════════════════════════════════════════════════════════════
 
 void printTelemetry() {
-  const char* state; const char* icon;
+  const char* state = "?";
+  const char* icon  = "?";
   switch (thermalState) {
-    case THERMAL_NORMAL:   state="NORMAL";   icon="✅"; break;
-    case THERMAL_WARMING:  state="WARMING";  icon="🌡️ "; break;
-    case THERMAL_WARNING:  state="WARNING";  icon="⚠️ "; break;
-    case THERMAL_CRITICAL: state="CRITICAL"; icon="🔥"; break;
-    case THERMAL_SHUTDOWN: state="SHUTDOWN"; icon="☠️ "; break;
-    case THERMAL_FAULT:    state="FAULT";    icon="❌"; break;
+    case THERMAL_NORMAL:   state = "NORMAL";   icon = "✅"; break;
+    case THERMAL_WARMING:  state = "WARMING";  icon = "🌡️ "; break;
+    case THERMAL_WARNING:  state = "WARNING";  icon = "⚠️ "; break;
+    case THERMAL_CRITICAL: state = "CRITICAL"; icon = "🔥"; break;
+    case THERMAL_SHUTDOWN: state = "SHUTDOWN"; icon = "☠️ "; break;
+    case THERMAL_FAULT:    state = "FAULT";    icon = "❌"; break;
   }
   Serial.printf("%s %-9s | Eixo:%5.1f | Estator~%5.1f | dT:%+5.2f°C/min | Fan:%3d%% | Motor:%s | Pico:%.1f | %uh\n",
     icon, state, tempShaftFiltered, tempEstatorEst,
-    dTdt*60.0f, pwmDuty, relayShutdown ? "OFF" : "ON ",
+    dTdt * 60.0f, pwmDuty, relayShutdown ? "OFF" : "ON ",
     tempPeak, totalActiveHours);
 }
 
@@ -574,13 +580,14 @@ void setup() {
   pinMode(PIN_RELAY, OUTPUT);
   digitalWrite(PIN_RELAY, RELAY_FAILSAFE_NC ? HIGH : LOW);
 
-  // PWM — API unificada ESP32 Arduino Core 3.x
-  ledcAttach(PIN_PWM, PWM_FREQ, PWM_RESOLUTION);
-  ledcWrite(PIN_PWM, 255);  // boot test
+  // PWM — API do ESP32 Arduino Core 2.0.x
+  ledcSetup(PWM_CHANNEL_FAN, PWM_FREQ, PWM_RESOLUTION);
+  ledcAttachPin(PIN_PWM, PWM_CHANNEL_FAN);
+  ledcWrite(PWM_CHANNEL_FAN, 255);  // boot test fan 100%
 
-  // ADC
+  // ADC (Core 2.x: ADC_11db é a constante correta)
   analogReadResolution(12);
-  analogSetAttenuation(ADC_ATTENDB_MAX);  // ADC_11db renomeado no Core 3.x
+  analogSetAttenuation(ADC_11db);
 
   // LEDs
   FastLED.addLeds<LED_TYPE, PIN_LED_RGB, LED_COLOR_ORDER>(leds, LED_COUNT);
