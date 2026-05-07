@@ -39,3 +39,9 @@ CONTEXT.md
 # KiCad backups e arquivos locais
 hardware/rs50-thermal-backups/
 hardware/*.kicad_prl
+
+# Copias e backups
+*.ino.txt
+* - Copy.*
+*.bak
+*.tmp
