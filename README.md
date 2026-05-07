@@ -1,3 +1,18 @@
+<p align="center">
+  <img src="docs/banner.svg" alt="RS50 Thermal Controller" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Jean-DrEaD/rs50-thermal-controller/releases/latest">
+    <img src="https://img.shields.io/github/v/release/Jean-DrEaD/rs50-thermal-controller?style=flat-square&color=blue" alt="Latest Release">
+  </a>
+  <a href="https://github.com/Jean-DrEaD/rs50-thermal-controller/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/Jean-DrEaD/rs50-thermal-controller/release.yml?style=flat-square" alt="Build Status">
+  </a>
+  <img src="https://img.shields.io/badge/platform-ESP32--S3-orange?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
+</p>
+
 # RS50 Thermal Controller
 
 Controle térmico **fail-safe** para volante RS50 modificado com motor BLDC
@@ -197,6 +212,32 @@ sequenceDiagram
 ├── hardware/                    ← KiCad PCB
 └── .github/workflows/           ← CI (compile firmware)
 ```
+## 🚧 Status & Roadmap
+
+### Software ✅
+Firmware **v3.3.8** publicado, CI verde, release com `.bin` no GitHub.
+
+### Hardware bring-up 🔧
+Próxima fase. Ordem de validação na bancada:
+
+1. Reguladores isolados (12V e 5V)
+2. ESP32-S3 boot + serial
+3. Leitura NTC contra termômetro de referência
+4. Fan PWM nas 3 faixas (off / ramp / max)
+5. WS2812 (cores por estado)
+6. Relé com carga fake (LED + resistor)
+7. MKS + motor real (fail-safe completo)
+8. Calibração da curva NTC
+9. Validação da histerese (68°C → 63°C)
+10. Dashboard web (Wi-Fi STA)
+
+### Telemetria 📡 (pós bring-up)
+Apenas depois do hardware testado em bancada:
+- MKS XDrive Mini suporta **CAN** ou **SPI** (não UART)
+- Provável caminho: CAN nativo (TWAI do ESP32-S3) + MCP2551
+- Integração com dashboard web e/ou Wi-Fi/BLE
+
+> ⚠️ Migração para PCB (pasta `hardware/`) **não está nos planos** do v3.x.
 
 ## 📜 Licença
 
