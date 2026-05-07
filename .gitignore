@@ -34,7 +34,6 @@ src/rs50_thermal/wifi_credentials.h
 # Scripts locais (não versionar)
 setup-repo.ps1
 update-repo.ps1
-CONTEXT.md
 
 # KiCad backups e arquivos locais
 hardware/rs50-thermal-backups/
