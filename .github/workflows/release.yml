@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Arduino CLI
-        uses: arduino/setup-arduino-cli@v1
+        uses: arduino/setup-arduino-cli@v2
 
       - name: Install ESP32 core
         run: |
-          arduino-cli config init
+          arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
           arduino-cli core update-index
           arduino-cli core install esp32:esp32@2.0.14
@@ -38,39 +38,86 @@ jobs:
       - name: Compile firmware
         run: |
           arduino-cli compile \
-            --fqbn esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=opi \
+            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none" \
             --output-dir ./release \
             ./src/rs50_thermal/
 
+      - name: List build output (debug)
+        run: |
+          echo "=== Conteudo de ./release/ ==="
+          ls -lhR ./release/
+
       - name: Rename artifacts
         run: |
-          cd release
-          mv *.bin "rs50_thermal_${{ steps.version.outputs.VERSION }}.bin"
-          mv *.elf "rs50_thermal_${{ steps.version.outputs.VERSION }}.elf"
+          set -e
+          # arduino-cli gera 3 .bin: app, bootloader, partitions
+          # O firmware principal e' o que termina em .ino.bin
+          APP_BIN=$(find ./release -name "*.ino.bin" -not -name "*.bootloader.*" -not -name "*.partitions.*" | head -1)
+          ELF=$(find ./release -name "*.ino.elf" | head -1)
+          BOOT=$(find ./release -name "*.bootloader.bin" | head -1)
+          PART=$(find ./release -name "*.partitions.bin" | head -1)
+
+          if [ -z "$APP_BIN" ]; then
+            echo "ERRO: nenhum *.ino.bin encontrado em ./release/"
+            find ./release -type f
+            exit 1
+          fi
+
+          VER="${{ steps.version.outputs.VERSION }}"
+
+          mv "$APP_BIN"  "./release/rs50_thermal_${VER}.bin"
+          [ -n "$ELF" ]  && mv "$ELF"  "./release/rs50_thermal_${VER}.elf"
+          [ -n "$BOOT" ] && cp "$BOOT" "./release/rs50_thermal_${VER}_bootloader.bin"
+          [ -n "$PART" ] && cp "$PART" "./release/rs50_thermal_${VER}_partitions.bin"
+
+          echo "=== Artefatos finais ==="
+          ls -lh ./release/rs50_thermal_${VER}*
+          echo ""
+          echo "=== Tamanho do firmware principal ==="
+          stat -c "%n: %s bytes" "./release/rs50_thermal_${VER}.bin"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.version.outputs.VERSION }}
           body: |
             ## RS50 Thermal Controller ${{ steps.version.outputs.VERSION }}
-            
-            ### Como gravar no ESP32-S3-Zero:
-            
-            1. Baixe o `.bin` desta release
-            2. Use o [ESP Web Tools](https://espressif.github.io/esptool-js/) ou esptool.py:
-               ```bash
-               esptool.py --chip esp32s3 --port /dev/ttyACM0 \
-                 write_flash 0x0 rs50_thermal_${{ steps.version.outputs.VERSION }}.bin
-               ```
-            3. Configure WiFi e LED_COUNT em `config.h` antes de gravar a partir do código fonte
-            
-            ### Documentação
+
+            ### 📦 Binários
+
+            - **`rs50_thermal_${{ steps.version.outputs.VERSION }}.bin`** — firmware principal (~756 KB)
+            - `rs50_thermal_${{ steps.version.outputs.VERSION }}_bootloader.bin` — bootloader (~14 KB)
+            - `rs50_thermal_${{ steps.version.outputs.VERSION }}_partitions.bin` — tabela de partições (~3 KB)
+            - `rs50_thermal_${{ steps.version.outputs.VERSION }}.elf` — debug symbols
+
+            ### 🔥 Como gravar no ESP32-S3-Zero
+
+            **Opção 1 — Apenas firmware (mais comum, mantém bootloader existente):**
+            ```bash
+            esptool.py --chip esp32s3 --port /dev/ttyACM0 \
+              write_flash 0x10000 rs50_thermal_${{ steps.version.outputs.VERSION }}.bin
+            ```
+
+            **Opção 2 — Flash completo (primeira gravação ou recovery):**
+            ```bash
+            esptool.py --chip esp32s3 --port /dev/ttyACM0 write_flash \
+              0x0      rs50_thermal_${{ steps.version.outputs.VERSION }}_bootloader.bin \
+              0x8000   rs50_thermal_${{ steps.version.outputs.VERSION }}_partitions.bin \
+              0x10000  rs50_thermal_${{ steps.version.outputs.VERSION }}.bin
+            ```
+
+            **Opção 3 — Web Flasher (mais fácil):**
+            Use [ESP Web Tools](https://espressif.github.io/esptool-js/) no Chrome/Edge.
+
+            ### ⚙️ Antes de gravar pelo código fonte
+            Configure `WIFI_SSID`, `WIFI_PASS` e `LED_COUNT` em `src/rs50_thermal/config.h`.
+
+            ### 📚 Documentação
             - 📖 [README](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/README.md)
-            - 🌡️ [Calibration Guide](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/docs/calibration-guide.md)
             - 📐 [Schematic](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/docs/wiring-schematic.svg)
+            - 📜 [CHANGELOG](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/CHANGELOG.md)
           files: |
-            release/*.bin
-            release/*.elf
+            release/rs50_thermal_*.bin
+            release/rs50_thermal_*.elf
           draft: false
           prerelease: false

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# RS50 Thermal Controller — pre-commit hook
+# Roda lints locais antes de permitir commit. Espelha o CI.
+
+set -e
+
+RED='\033[0;31m'
+YEL='\033[0;33m'
+GRN='\033[0;32m'
+NC='\033[0m'
+
+echo "🔍 Pre-commit: validando alterações..."
+
+# Lista de .ino e .h staged
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E 'src/rs50_thermal/.*\.(ino|h)$' || true)
+
+if [ -z "$FILES" ]; then
+  echo "✅ Sem arquivos C/C++ alterados — pulando lints."
+  exit 0
+fi
+
+echo "📂 Arquivos a validar:"
+echo "$FILES" | sed 's/^/   - /'
+
+# 1) Tabs (warning, não bloqueia)
+if echo "$FILES" | xargs grep -lP '\t' 2>/dev/null; then
+  echo -e "${YEL}⚠️  Tabs encontrados (use 2 espaços)${NC}"
+fi
+
+# 2) Trailing whitespace (warning)
+if echo "$FILES" | xargs grep -lP ' +$' 2>/dev/null; then
+  echo -e "${YEL}⚠️  Whitespace no final de linha${NC}"
+fi
+
+# 3) FW_VERSION pattern (BLOQUEIA se errado)
+if echo "$FILES" | grep -q "config.h"; then
+  if ! grep -qE 'FW_VERSION\s+"3\.3\.[0-9]+"' src/rs50_thermal/config.h; then
+    echo -e "${RED}❌ FW_VERSION em config.h fora do padrão 3.3.x${NC}"
+    grep FW_VERSION src/rs50_thermal/config.h || true
+    exit 1
+  fi
+  VER=$(grep -oP 'FW_VERSION\s+"\K[^"]+' src/rs50_thermal/config.h)
+  echo -e "${GRN}✅ FW_VERSION: $VER${NC}"
+fi
+
+# 4) Coerência: se config.h mudou versão, .ino deve ter o mesmo número no header
+if echo "$FILES" | grep -q "config.h" && [ -n "$VER" ]; then
+  if ! grep -q "RS50 Thermal Controller v$VER" src/rs50_thermal/rs50_thermal.ino; then
+    echo -e "${RED}❌ Header do .ino nao bate com FW_VERSION ($VER)${NC}"
+    echo "   Atualize a linha 2 de rs50_thermal.ino para:"
+    echo "   //  RS50 Thermal Controller v$VER"
+    exit 1
+  fi
+  echo -e "${GRN}✅ Versão do .ino e config.h sincronizadas${NC}"
+fi
+
+# 5) Macros referenciadas no .ino existem em config.h
+INO_MACROS=$(grep -oP '\b(PIN_|PWM_|TEMP_|LED_|FAULT_|RELAY_|EMA_|DTDT_|ADC_|R_|NTC_|VCC_|T_|SHUTDOWN_|HOUR_|ACTIVE_|CRITICAL_|FAULT_|WIFI_|WEB_|WS_|ENABLE_|SAMPLES|SERIAL_|UPDATE_|SHUTDOWN_|LEAD_|THERMAL_|FW_)[A-Z_0-9]+' src/rs50_thermal/rs50_thermal.ino | sort -u)
+MISSING=""
+for m in $INO_MACROS; do
+  if ! grep -qE "#define\s+$m\b|enum.*$m" src/rs50_thermal/config.h src/rs50_thermal/rs50_thermal.ino 2>/dev/null; then
+    MISSING="$MISSING $m"
+  fi
+done
+if [ -n "$MISSING" ]; then
+  echo -e "${YEL}⚠️  Macros usadas no .ino mas talvez não definidas:${NC}"
+  echo "  $MISSING"
+  echo "   (verifique se são parte do core/lib externo)"
+fi
+
+echo -e "${GRN}✅ Pre-commit OK${NC}"
+exit 0

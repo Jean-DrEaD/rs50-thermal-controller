@@ -3,6 +3,59 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.7] — 2026-05-06
+
+### Fixed
+- 🚨 **Release `.bin` errado**: o workflow `release.yml` da v3.3.6
+  publicou o `bootloader.bin` (~14 KB) ao invés do firmware principal
+  (~756 KB). Causa: `find -name "*.bin" | head -1` pegava o primeiro
+  na ordem alfabética (bootloader vem antes de `ino.bin`). Solução:
+  filtrar especificamente por `*.ino.bin`.
+- **Release agora publica os 3 binários separadamente**: app
+  (`*.bin`), bootloader (`*_bootloader.bin`) e partições
+  (`*_partitions.bin`), com instruções de gravação no endereço correto
+  (`0x10000` para o app, não `0x0`).
+
+### Added
+- 📈 **Gráfico histórico no dashboard** (Chart.js): linha temporal
+  dos últimos 5 minutos com 3 séries (Eixo, Estator, Fan PWM).
+  Eixos duplos (temperatura à esquerda, fan % à direita).
+- 🪝 **Pre-commit hook** em `.githooks/pre-commit`:
+  - Valida `FW_VERSION` no padrão `3.3.x`
+  - Confere coerência entre header do `.ino` e `FW_VERSION` em `config.h`
+  - Detecta macros referenciadas no `.ino` mas ausentes do `config.h`
+  - Avisa sobre tabs e trailing whitespace
+  - Ativar com: `git config core.hooksPath .githooks`
+- 📘 **Documentação de branch protection** no README (passo a passo
+  manual no GitHub Settings).
+
+### Changed
+- Release notes agora documentam **3 modos de gravação**: só app
+  (atualização), flash completo (recovery) e Web Flasher (mais fácil).
+
+## [3.3.6] — 2026-05-06
+
+### Fixed
+- **CI workflow `release.yml`**: corrigido step "Rename artifacts" que
+  falhava com `mv: target 'rs50_thermal_v3.3.5.bin': No such file`.
+  - Causa: `arduino-cli` salva binários em subpasta
+    `./release/rs50_thermal/`, não direto em `./release/`.
+  - Solução: usar `find ./release -name "*.bin"` para localizar.
+- **CI workflow `arduino-build.yml`**: estava usando ESP32 core
+  **3.0.7** + FastLED 3.7.8 + WebSockets 2.7.2, incompatíveis com a API
+  `ledcSetup`/`ledcAttachPin` usada no firmware. Migrado para core
+  **2.0.14** + FastLED 3.6.0 + WebSockets 2.4.1 (alinhado com release.yml
+  e ambiente local).
+
+### Changed
+- **`release.yml`**: FQBN agora usa `PSRAM=disabled` (era `PSRAM=opi`).
+  O ESP32-S3-Zero da Waveshare **não tem PSRAM** — com `opi` o firmware
+  compila mas trava no boot esperando RAM externa.
+- **`release.yml`**: `setup-arduino-cli@v1` → `@v2`.
+- **`release.yml`**: `softprops/action-gh-release@v1` → `@v2`.
+- **`arduino-build.yml`**: lint de tabs/whitespace agora gera warning
+  (era erro fatal que bloqueava merge).
+
 ## [3.3.5] — 2026-05-06
 
 ### Fixed
