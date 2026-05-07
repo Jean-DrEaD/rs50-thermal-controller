@@ -1,82 +1,357 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="100%">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f0c29;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#302b63;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#24243e;stop-opacity:1" />
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1200 300"
+   width="100%"
+   version="1.1"
+   id="svg28"
+   sodipodi:docname="banner.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview28"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.48"
+     inkscape:cx="832.43243"
+     inkscape:cy="131.41892"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g28" />
+  <defs
+     id="defs8">
+    <linearGradient
+       id="bg"
+       x1="0%"
+       y1="0%"
+       x2="100%"
+       y2="100%">
+      <stop
+         offset="0%"
+         style="stop-color:#0f0c29;stop-opacity:1"
+         id="stop1" />
+      <stop
+         offset="50%"
+         style="stop-color:#302b63;stop-opacity:1"
+         id="stop2" />
+      <stop
+         offset="100%"
+         style="stop-color:#24243e;stop-opacity:1"
+         id="stop3" />
     </linearGradient>
-    <linearGradient id="heat" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#00d4ff" />
-      <stop offset="33%" style="stop-color:#00ff88" />
-      <stop offset="66%" style="stop-color:#ffaa00" />
-      <stop offset="100%" style="stop-color:#ff0044" />
+    <linearGradient
+       id="heat"
+       x1="0%"
+       y1="0%"
+       x2="100%"
+       y2="0%">
+      <stop
+         offset="0%"
+         style="stop-color:#00d4ff"
+         id="stop4" />
+      <stop
+         offset="33%"
+         style="stop-color:#00ff88"
+         id="stop5" />
+      <stop
+         offset="66%"
+         style="stop-color:#ffaa00"
+         id="stop6" />
+      <stop
+         offset="100%"
+         style="stop-color:#ff0044"
+         id="stop7" />
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
+    <filter
+       id="glow"
+       x="-0.18"
+       y="-0.6"
+       width="1.36"
+       height="2.2">
+      <feGaussianBlur
+         stdDeviation="3"
+         result="coloredBlur"
+         id="feGaussianBlur7" />
+      <feMerge
+         id="feMerge8">
+        <feMergeNode
+           in="coloredBlur"
+           id="feMergeNode7" />
+        <feMergeNode
+           in="SourceGraphic"
+           id="feMergeNode8" />
       </feMerge>
     </filter>
   </defs>
-  
   <!-- Background -->
-  <rect width="1200" height="300" fill="url(#bg)"/>
-  
+  <rect
+     width="1200"
+     height="300"
+     fill="url(#bg)"
+     id="rect8" />
   <!-- Grid pattern -->
-  <g stroke="#ffffff10" stroke-width="1">
-    <line x1="0" y1="50" x2="1200" y2="50"/>
-    <line x1="0" y1="100" x2="1200" y2="100"/>
-    <line x1="0" y1="150" x2="1200" y2="150"/>
-    <line x1="0" y1="200" x2="1200" y2="200"/>
-    <line x1="0" y1="250" x2="1200" y2="250"/>
+  <g
+     stroke="#ffffff10"
+     stroke-width="1"
+     id="g12">
+    <line
+       x1="0"
+       y1="50"
+       x2="1200"
+       y2="50"
+       id="line8" />
+    <line
+       x1="0"
+       y1="100"
+       x2="1200"
+       y2="100"
+       id="line9" />
+    <line
+       x1="0"
+       y1="150"
+       x2="1200"
+       y2="150"
+       id="line10" />
+    <line
+       x1="0"
+       y1="200"
+       x2="1200"
+       y2="200"
+       id="line11" />
+    <line
+       x1="0"
+       y1="250"
+       x2="1200"
+       y2="250"
+       id="line12" />
   </g>
-  
   <!-- Logo: Steering wheel -->
-  <g transform="translate(120, 150)">
-    <circle cx="0" cy="0" r="70" fill="none" stroke="#ff0044" stroke-width="6" filter="url(#glow)"/>
-    <circle cx="0" cy="0" r="50" fill="none" stroke="#ff0044" stroke-width="3" opacity="0.6"/>
-    <circle cx="0" cy="0" r="20" fill="#ff0044" filter="url(#glow)"/>
-    <line x1="-70" y1="0" x2="-20" y2="0" stroke="#ff0044" stroke-width="6"/>
-    <line x1="70" y1="0" x2="20" y2="0" stroke="#ff0044" stroke-width="6"/>
-    <line x1="0" y1="-70" x2="0" y2="-20" stroke="#ff0044" stroke-width="6"/>
+  <g
+     transform="translate(120, 150)"
+     id="g19">
+    <circle
+       cx="0"
+       cy="0"
+       r="70"
+       fill="none"
+       stroke="#ff0044"
+       stroke-width="6"
+       filter="url(#glow)"
+       id="circle12" />
+    <circle
+       cx="0"
+       cy="0"
+       r="50"
+       fill="none"
+       stroke="#ff0044"
+       stroke-width="3"
+       opacity="0.6"
+       id="circle13" />
+    <circle
+       cx="0"
+       cy="0"
+       r="20"
+       fill="#ff0044"
+       filter="url(#glow)"
+       id="circle14" />
+    <line
+       x1="-70"
+       y1="0"
+       x2="-20"
+       y2="0"
+       stroke="#ff0044"
+       stroke-width="6"
+       id="line14" />
+    <line
+       x1="70"
+       y1="0"
+       x2="20"
+       y2="0"
+       stroke="#ff0044"
+       stroke-width="6"
+       id="line15" />
+    <line
+       x1="0"
+       y1="-70"
+       x2="0"
+       y2="-20"
+       stroke="#ff0044"
+       stroke-width="6"
+       id="line16" />
     <!-- Heat waves -->
-    <path d="M -90,-40 Q -100,-50 -90,-60" stroke="#ffaa00" stroke-width="3" fill="none" opacity="0.7"/>
-    <path d="M 90,-40 Q 100,-50 90,-60" stroke="#ffaa00" stroke-width="3" fill="none" opacity="0.7"/>
-    <path d="M -85,-25 Q -95,-35 -85,-45" stroke="#ffaa00" stroke-width="3" fill="none" opacity="0.5"/>
-    <path d="M 85,-25 Q 95,-35 85,-45" stroke="#ffaa00" stroke-width="3" fill="none" opacity="0.5"/>
+    <path
+       d="M -90,-40 Q -100,-50 -90,-60"
+       stroke="#ffaa00"
+       stroke-width="3"
+       fill="none"
+       opacity="0.7"
+       id="path16" />
+    <path
+       d="M 90,-40 Q 100,-50 90,-60"
+       stroke="#ffaa00"
+       stroke-width="3"
+       fill="none"
+       opacity="0.7"
+       id="path17" />
+    <path
+       d="M -85,-25 Q -95,-35 -85,-45"
+       stroke="#ffaa00"
+       stroke-width="3"
+       fill="none"
+       opacity="0.5"
+       id="path18" />
+    <path
+       d="M 85,-25 Q 95,-35 85,-45"
+       stroke="#ffaa00"
+       stroke-width="3"
+       fill="none"
+       opacity="0.5"
+       id="path19" />
   </g>
-  
   <!-- Title -->
-  <text x="280" y="130" font-family="Arial Black, sans-serif" font-size="56" font-weight="900" fill="#ffffff" filter="url(#glow)">
+  <text
+     x="280"
+     y="130"
+     font-family="Arial Black, sans-serif"
+     font-size="56"
+     font-weight="900"
+     fill="#ffffff"
+     filter="url(#glow)"
+     id="text19">
     RS50 THERMAL
   </text>
-  <text x="280" y="180" font-family="Arial, sans-serif" font-size="28" fill="#00d4ff" font-weight="bold">
+  <text
+     x="280"
+     y="180"
+     font-family="Arial, sans-serif"
+     font-size="28"
+     fill="#00d4ff"
+     font-weight="bold"
+     id="text20">
     CONTROLLER
   </text>
-  <text x="280" y="220" font-family="Arial, sans-serif" font-size="18" fill="#ffffffaa">
+  <text
+     x="280"
+     y="220"
+     font-family="Arial, sans-serif"
+     font-size="18"
+     fill="#ffffffaa"
+     id="text21">
     Direct Drive Wheel Protection • Open Source
   </text>
-  
   <!-- Temperature gauge bars (decorative) -->
-  <g transform="translate(280, 240)">
-    <rect x="0" y="0" width="600" height="12" rx="6" fill="#ffffff20"/>
-    <rect x="0" y="0" width="450" height="12" rx="6" fill="url(#heat)" filter="url(#glow)"/>
-    <text x="610" y="10" font-family="monospace" font-size="14" fill="#00d4ff" font-weight="bold">75%</text>
+  <g
+     transform="translate(280, 240)"
+     id="g22">
+    <rect
+       x="0"
+       y="0"
+       width="600"
+       height="12"
+       rx="6"
+       fill="#ffffff20"
+       id="rect21" />
+    <rect
+       x="0"
+       y="0"
+       width="450"
+       height="12"
+       rx="6"
+       fill="url(#heat)"
+       filter="url(#glow)"
+       id="rect22" />
+    <text
+       x="610"
+       y="10"
+       font-family="monospace"
+       font-size="14"
+       fill="#00d4ff"
+       font-weight="bold"
+       id="text22">75%</text>
   </g>
-  
   <!-- Stats badges -->
-  <g transform="translate(950, 70)" font-family="Arial, sans-serif">
-    <rect x="0" y="0" width="180" height="50" rx="8" fill="#ffffff15" stroke="#00d4ff" stroke-width="1"/>
-    <text x="15" y="22" font-size="11" fill="#ffffff80">FW VERSION</text>
-    <text x="15" y="42" font-size="20" fill="#00d4ff" font-weight="bold">v3.3.0</text>
-    
-    <rect x="0" y="60" width="180" height="50" rx="8" fill="#ffffff15" stroke="#ff0044" stroke-width="1"/>
-    <text x="15" y="82" font-size="11" fill="#ffffff80">PROTECTION</text>
-    <text x="15" y="102" font-size="20" fill="#ff0044" font-weight="bold">FAIL-SAFE</text>
-    
-    <rect x="0" y="120" width="180" height="50" rx="8" fill="#ffffff15" stroke="#00ff88" stroke-width="1"/>
-    <text x="15" y="142" font-size="11" fill="#ffffff80">MCU</text>
-    <text x="15" y="162" font-size="20" fill="#00ff88" font-weight="bold">ESP32-S3</text>
+  <g
+     transform="translate(950, 70)"
+     font-family="Arial, sans-serif"
+     id="g28">
+    <rect
+       x="0"
+       y="0"
+       width="180"
+       height="50"
+       rx="8"
+       fill="#ffffff15"
+       stroke="#00d4ff"
+       stroke-width="1"
+       id="rect23" />
+    <text
+       x="15"
+       y="22"
+       font-size="11"
+       fill="#ffffff80"
+       id="text23">FW VERSION</text>
+    <text
+       x="15"
+       y="42"
+       font-size="20px"
+       fill="#00d4ff"
+       font-weight="bold"
+       id="text24">v3.3.8</text>
+    <rect
+       x="0"
+       y="60"
+       width="180"
+       height="50"
+       rx="8"
+       fill="#ffffff15"
+       stroke="#ff0044"
+       stroke-width="1"
+       id="rect24" />
+    <text
+       x="15"
+       y="82"
+       font-size="11"
+       fill="#ffffff80"
+       id="text25">PROTECTION</text>
+    <text
+       x="15"
+       y="102"
+       font-size="20"
+       fill="#ff0044"
+       font-weight="bold"
+       id="text26">FAIL-SAFE</text>
+    <rect
+       x="0"
+       y="120"
+       width="180"
+       height="50"
+       rx="8"
+       fill="#ffffff15"
+       stroke="#00ff88"
+       stroke-width="1"
+       id="rect26" />
+    <text
+       x="15"
+       y="142"
+       font-size="11"
+       fill="#ffffff80"
+       id="text27">MCU</text>
+    <text
+       x="15"
+       y="162"
+       font-size="20"
+       fill="#00ff88"
+       font-weight="bold"
+       id="text28">ESP32-S3</text>
   </g>
 </svg>
