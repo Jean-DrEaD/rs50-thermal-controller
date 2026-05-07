@@ -9,7 +9,7 @@
 
 #include <Arduino.h>
 
-const char HTML_PAGE[] PROGMEM = R"DASHBOARD_RS50_V338(
+const char HTML_PAGE[] PROGMEM = R"RS50DASH338(
 <!DOCTYPE html>
 <html lang="pt-BR"><head>
 <meta charset="UTF-8">
@@ -134,6 +134,6 @@ function connect(){
 }
 connect();
 </script></body></html>
-)DASHBOARD_RS50_V338";
+)RS50DASH338";
 
 #endif // DASHBOARD_H
