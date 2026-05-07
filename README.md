@@ -1,3 +1,18 @@
+<p align="center">
+  <img src="docs/banner.svg" alt="RS50 Thermal Controller" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Jean-DrEaD/rs50-thermal-controller/releases/latest">
+    <img src="https://img.shields.io/github/v/release/Jean-DrEaD/rs50-thermal-controller?style=flat-square&color=blue" alt="Latest Release">
+  </a>
+  <a href="https://github.com/Jean-DrEaD/rs50-thermal-controller/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/Jean-DrEaD/rs50-thermal-controller/release.yml?style=flat-square" alt="Build Status">
+  </a>
+  <img src="https://img.shields.io/badge/platform-ESP32--S3-orange?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
+</p>
+
 # RS50 Thermal Controller
 
 Controle térmico **fail-safe** para volante RS50 modificado com motor BLDC
