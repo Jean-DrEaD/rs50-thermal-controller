@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════════════════════
 //  RS50 Thermal Controller — config.h
-//  Version: 3.3.7
+//  Version: 3.3.8
 //  Author: DrEaD (Joinville/SC)
 //  Hardware: ESP32-S3-Zero Waveshare + NTC 100K B3950 + Songle SLA-24VDC-SL-C
 //  Target: Volante DD RS50 Clone + Hoverboard 15Nm + ODESC FFBeast
@@ -9,7 +9,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define FW_VERSION "3.3.7"
+#define FW_VERSION "3.3.8"
 #define FW_NAME    "RS50-Thermal"
 
 // ═══════════════════════════════════════════════════════════════════════════
