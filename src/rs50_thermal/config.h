@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════════════════════
 //  RS50 Thermal Controller — config.h
-//  Version: 3.3.8
+//  Version: 3.3.9
 //  Author: DrEaD (Joinville/SC)
 //  Hardware: ESP32-S3-Zero Waveshare + NTC 100K B3950 + Songle SLA-24VDC-SL-C
 //  Target: Volante DD RS50 Clone + Hoverboard 15Nm + ODESC FFBeast
@@ -9,7 +9,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define FW_VERSION "3.3.8"
+#define FW_VERSION "3.3.9"
 #define FW_NAME    "RS50-Thermal"
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -18,7 +18,8 @@
 #define PIN_PWM         5     // Fan PWM (4-pin, sinal azul)
 #define PIN_NTC         1     // ADC1_CH0 — NTC no eixo
 #define PIN_RELAY       4     // Driver MOSFET do relé
-#define PIN_LED_RGB     21    // WS2812 onboard (e/ou strip externa)
+#define PIN_LED_STRIP   9     // WS2812 strip externa (330Ω série — GPIO9)
+// ⚠️  GPIO21 = LED RGB onboard do ESP32-S3-Zero — NÃO usar para strip
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  LEDs ENDEREÇÁVEIS — escolha quantos vai usar
@@ -28,7 +29,7 @@
 //  5 LEDs → termômetro vertical (gradiente verde→vermelho)
 //  N LEDs → modo termômetro estendido
 // ═══════════════════════════════════════════════════════════════════════════
-#define LED_COUNT          1            // ⚙️ AJUSTE AQUI: 1, 3, 5 ou mais
+#define LED_COUNT          5            // 5 LEDs → modo THERMOMETER vertical
 #define LED_COLOR_ORDER    GRB           // Waveshare = GRB!
 #define LED_TYPE           WS2812B
 #define LED_BRIGHTNESS_MAX 80
@@ -119,6 +120,27 @@
 #define SAMPLES           25
 #define UPDATE_INTERVAL   1500
 #define SERIAL_BAUD       115200
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SIMHUB — Telemetria Serial (Custom Serial Input)
+//
+//  Formato enviado:  $SH;shaft=25.3;stator=34.3;fan=40;state=0;motor=1;\n
+//
+//  Estados (state): 0=NORMAL 1=WARMING 2=WARNING 3=CRITICAL 4=SHUTDOWN 5=FAULT
+//
+//  Configurar no SimHub: "Custom Serial" → porta COM do ESP32
+//    Baud: 115200  |  Linha começa com "$SH;" (use como delimiter/filter)
+//    Mapear: shaft → temperatura eixo | stator → temperatura estator
+//            fan   → % PWM da fan    | motor  → 1=ligado / 0=desligado
+//            state → enum ThermalState (0-5)
+// ═══════════════════════════════════════════════════════════════════════════
+#define ENABLE_SIMHUB       true
+#define SIMHUB_OUTPUT_MS    100    // 10 Hz — suave no SimHub sem overload
+
+// UDP broadcast — ESP32 envia para 255.255.255.255 (toda a rede local).
+// SimHub escuta na mesma porta. Nenhum IP fixo necessário.
+// No SimHub: Devices → Custom UDP → porta abaixo → mesmo parsing do Serial.
+#define SIMHUB_UDP_PORT     4242
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  PWM HARDWARE (ESP32 LEDC — Arduino Core 2.0.x)

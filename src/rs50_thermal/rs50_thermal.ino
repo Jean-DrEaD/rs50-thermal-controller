@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════
-//  RS50 Thermal Controller v3.3.8
+//  RS50 Thermal Controller v3.3.9
 //
 //  Hardware:
 //    - ESP32-S3-Zero (Waveshare)
@@ -30,6 +30,7 @@
 #include <FastLED.h>
 #include <Preferences.h>
 #include <WiFi.h>
+#include <WiFiUDP.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
 #include "config.h"
@@ -58,6 +59,7 @@ unsigned long activeMillisAccum = 0;
 unsigned long lastHourSave      = 0;
 unsigned long lastWsUpdate      = 0;
 unsigned long lastWifiRetry     = 0;
+unsigned long lastSimHubUpdate  = 0;
 
 int      pwmDuty         = PWM_MIN;
 bool     sensorFault     = false;
@@ -71,6 +73,7 @@ CRGB leds[LED_COUNT];
 Preferences prefs;
 WebServer server(WEB_PORT);
 WebSocketsServer webSocket(WS_PORT);
+WiFiUDP udpBroadcast;
 
 // ════════════════════════════════════════════════════════════════════════════
 //  MÓDULO 1: LEITURA E PROCESSAMENTO TÉRMICO
@@ -450,6 +453,8 @@ void setupWiFi() {
     server.on("/", []() { server.send_P(200, "text/html", HTML_PAGE); });
     server.begin();
     webSocket.begin();
+    udpBroadcast.begin(SIMHUB_UDP_PORT);
+    Serial.printf("   UDP broadcast → 255.255.255.255:%d\n", SIMHUB_UDP_PORT);
   } else {
     Serial.println(F("\n⚠️ WiFi falhou — modo offline (tentará reconectar)"));
   }
@@ -488,7 +493,42 @@ void printTelemetry() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  SETUP & LOOP
+//  MÓDULO 8: TELEMETRIA SIMHUB (Custom Serial Input)
+//
+//  Formato: $SH;shaft=25.3;stator=34.3;fan=40;state=0;motor=1;\n
+//
+//  No SimHub: Devices → Custom Serial → escolher a porta COM do ESP32
+//    Baud 115200, delimitar por "\n", filtrar linhas que iniciam com "$SH;"
+//    Mapear as variáveis conforme os nomes abaixo.
+// ════════════════════════════════════════════════════════════════════════════
+
+void sendSimHubTelemetry() {
+  // Monta o frame uma vez só (reutilizado por Serial e UDP)
+  char frame[128];
+  snprintf(frame, sizeof(frame),
+    "$SH;shaft=%.1f;stator=%.1f;dtdt=%.2f;fan=%d;peak=%.1f;state=%d;motor=%d;hours=%u;\n",
+    tempShaftFiltered,
+    tempEstatorEst,
+    dTdt * 60.0f,
+    pwmDuty,
+    tempPeak,
+    (int)thermalState,
+    relayShutdown ? 0 : 1,
+    totalActiveHours
+  );
+
+  // UDP broadcast — entrega ao SimHub sem IP fixo
+  if (ENABLE_WIFI && WiFi.status() == WL_CONNECTED) {
+    udpBroadcast.beginPacket(IPAddress(255, 255, 255, 255), SIMHUB_UDP_PORT);
+    udpBroadcast.print(frame);
+    udpBroadcast.endPacket();
+  } else {
+    // WiFi offline: cai de volta para Serial (debug / cabo USB)
+    Serial.print(frame);
+  }
+}
+
+
 // ════════════════════════════════════════════════════════════════════════════
 
 void setup() {
@@ -509,7 +549,7 @@ void setup() {
   analogSetAttenuation(ADC_11db);
 
   // LEDs
-  FastLED.addLeds<LED_TYPE, PIN_LED_RGB, LED_COLOR_ORDER>(leds, LED_COUNT);
+  FastLED.addLeds<LED_TYPE, PIN_LED_STRIP, LED_COLOR_ORDER>(leds, LED_COUNT);
   FastLED.setBrightness(255);
   fill_solid(leds, LED_COUNT, CRGB::Blue);
   FastLED.show();
@@ -560,6 +600,13 @@ void loop() {
       }
     } else {
       wifiReconnect();
+    }
+  }
+
+  if (ENABLE_SIMHUB) {
+    if (now - lastSimHubUpdate >= SIMHUB_OUTPUT_MS) {
+      lastSimHubUpdate = now;
+      sendSimHubTelemetry();
     }
   }
 
