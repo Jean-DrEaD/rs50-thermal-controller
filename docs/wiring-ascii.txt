@@ -29,7 +29,7 @@
                      │                      │
    Relé MOSFET ─────► │ GPIO 4               │ ──► IRLZ44N Gate (220Ω)
                      │                      │
-   WS2812 ──────────► │ GPIO 9 + 330Ω        │  ← ✅ CORRIGIDO (não GPIO21!)
+   WS2812 ──────────► │ GPIO 9 + 330Ω        │
                      │                      │
                      │ GND ─────── GND      │
                      │ 5V  ─────── VBUS     │
@@ -101,7 +101,7 @@ GPIO 5 ────────────────► Fan PWM (25kHz, 3.3V 
 
   5V ───────► WS2812 VCC
   GND ──────► WS2812 GND
-GPIO 9 ─[330Ω]► WS2812 DIN  ← ✅ CORRIGIDO!
+GPIO 9 ─[330Ω]► WS2812 DIN
 
 LED_COUNT: 1-5 LEDs (config.h)
 
