@@ -3,37 +3,90 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
-## [3.3.10] - 2026-05-13
+## [3.3.11] — 2026-05-13
 
 ### Added
-- Macro `LED_COUNT` (5) em `config.h` — antes mencionada no README mas ausente
-- Macro `PIN_WS2812` (GPIO 9) e `LED_BRIGHTNESS` (64)
-- Macro `TEMP_RESTART` (63°C) para histerese pós-shutdown explícita
-- Lições aprendidas #8, #9 e #10 no `CONTEXT.md`
+- `src/rs50_thermal/config.h.example` versionado como template público
+  (sem credenciais Wi-Fi, OTA password ou tokens).
+- Seção **"Procedimento de Download Manual (GPIO0 + RESET)"** no `README.md`
+  para casos em que o auto-reset via USB-CDC falha.
+- Script `flash.ps1` (PowerShell) para upload local via `arduino-cli`,
+  parametrizado por `-Port COMx`.
+
+### Changed
+- **FQBN do build PowerShell** consolidado e validado:
+  `esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled`
+  - Removida opção inválida `FlashFreq` que rejeitava o build no `arduino-cli`.
+  - `PSRAM=disabled` agora é padrão explícito (S3-Zero **não tem PSRAM** —
+    com `opi` compila mas trava no boot esperando RAM externa, mesmo problema
+    documentado na v3.3.6 para `release.yml`).
+- HTML/JS do dashboard movido de raw literal inline no `.ino` para
+  `web_ui.h` separado, seguindo a mesma regra já aplicada ao `dashboard.h`
+  na v3.3.8 (delimitador raw ≤ 16 chars).
+
+### Fixed
+- **Boot loop pós-upload via USB-CDC**: resolvido documentando o
+  procedimento manual (segurar GPIO0 → pulsar RESET → soltar GPIO0 →
+  upload → RESET final). O `auto-reset` do S3-Zero é instável quando
+  `USBMode=hwcdc` está ativo durante o flash.
+- Perda de porta COM durante upload em modo automático — agora documentado
+  o fallback manual no README.
+- Divergência residual entre `config.h` e `README.md` em macros mencionadas
+  como "configuráveis" (reforço da Lição #9 documentada na v3.3.10).
+
+### Removed
+- `src/rs50_thermal/config.h` local (com credenciais) removido do tracking Git.
+  Adicionado ao `.gitignore`. Usar `config.h.example` como base.
+
+### Notes
+- `arduino-cli monitor` não oferece reset/DTR como o Serial Monitor da IDE
+  Arduino. Para debug serial, recomendado: **PlatformIO**, **Tera Term**
+  ou **PuTTY** (todos respeitam o handshake CDC do S3).
+- Topologia do relé permanece **fail-safe** (NC energizado mantém motor
+  ativo; falha de MCU ou energia → relé desarma → carga preservada).
+
+### Lessons learned (incorporadas ao CONTEXT.md)
+- **#11**: `FlashFreq` não é parâmetro válido do FQBN para `esp32s3` —
+  só `esp32` clássico aceita. Verificar com `arduino-cli board details`
+  antes de adicionar opções ao FQBN.
+- **#12**: USB-CDC nativo do S3 + `auto-reset` é frágil — sempre ter
+  fallback manual documentado.
+
+---
+
+## [3.3.10] — 2026-05-13
+
+### Added
+- Macro `LED_COUNT` (5) em `config.h` — antes mencionada no README mas ausente.
+- Macro `PIN_WS2812` (GPIO 9) e `LED_BRIGHTNESS` (64).
+- Macro `TEMP_RESTART` (63°C) para histerese pós-shutdown explícita.
+- Lições aprendidas #8, #9 e #10 no `CONTEXT.md`.
 
 ### Changed
 - **Pinout migrado para ESP32-S3-Zero** (estava com pinos do ESP32 clássico):
   - `PIN_NTC`: 34 → 1
   - `PIN_RELAY`: 26 → 4
   - `PIN_PWM`: 25 → 5
-- **NTC**: 10k → 100k B3950 (alinhado ao sensor real no estator)
+- **NTC**: 10k → 100k B3950 (alinhado ao sensor real no estator).
 - **Thresholds térmicos** alinhados ao `CONTEXT.md`:
   - `TEMP_IDLE`: 30 → 40°C
   - `TEMP_WARNING`: 65 → 60°C
   - `TEMP_CRITICAL`: 80 → 68°C
   - `THERMAL_HYSTERESIS`: 2.0 → 5.0°C
-- `PWM_MIN`: 20 → 0 (fan desliga em repouso, menos sujeira)
-- Comentário do pinout do relé esclarecido (HIGH = aciona MOSFET = abre NC)
+- `PWM_MIN`: 20 → 0 (fan desliga em repouso, menos sujeira).
+- Comentário do pinout do relé esclarecido (HIGH = aciona MOSFET = abre NC).
 
 ### Removed
-- `#define UDP_PORT 33339` duplicado no `.ino` (já vinha do `config.h` como 33333)
-- `#include <Wire.h>`, `Wire.begin()`, `PIN_SDA`, `PIN_SCL` (I2C não usado em v3.x)
-- Função `stateName(int)` inline em `config.h` (dead code — `.ino` tem versão com `ThermalState`)
-- Placeholder `<owner>` no header do `.ino` (corrigido para `Jean-DrEaD`)
+- `#define UDP_PORT 33339` duplicado no `.ino` (já vinha do `config.h` como 33333).
+- `#include <Wire.h>`, `Wire.begin()`, `PIN_SDA`, `PIN_SCL` (I2C não usado em v3.x).
+- Função `stateName(int)` inline em `config.h` (dead code — `.ino` tem versão com `ThermalState`).
+- Placeholder `<owner>` no header do `.ino` (corrigido para `Jean-DrEaD`).
 
 ### Fixed
-- Comentário `R_SERIES -> 3V3` corrigido para `NTC_SERIES_R -> 3V3` (nome real da macro)
-- Trailing whitespace no `.ino`
+- Comentário `R_SERIES -> 3V3` corrigido para `NTC_SERIES_R -> 3V3` (nome real da macro).
+- Trailing whitespace no `.ino`.
+
+---
 
 ## [3.3.9] — 2026-05-12
 

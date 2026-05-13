@@ -1,7 +1,7 @@
 # RS50 Thermal Controller — Context
 
 > Documento curto para retomar o projeto rapidamente.
-> Última atualização: 2026-05-13 (v3.3.10).
+> Última atualização: 2026-05-13 (v3.3.11).
 
 ## 🎯 Objetivo
 
@@ -11,11 +11,11 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 
 ## 📍 Status atual
 
-- **Software**: ✅ v3.3.10 publicada, CI verde, release oficial no GitHub
+- **Software**: ✅ v3.3.11 publicada, CI verde, release oficial no GitHub
 - **Config**: ✅ pinout, thresholds e macros sincronizados com hardware real
-- **CI/Build**: ✅ core ESP32 fixado em `2.0.14`, libs inline nos workflows
-- **Hardware**: 🔧 aguardando montagem física e bring-up
-- **Próximo passo**: montar protótipo na bancada → validar fail-safe → debug
+- **CI/Build**: ✅ core ESP32 fixado em `2.0.14`, FQBN validado com `PSRAM=disabled`
+- **Hardware**: 🔧 bring-up parcial — upload via procedimento manual GPIO0+RESET validado
+- **Próximo passo**: validar boot limpo + serial CDC → seguir checklist de bring-up
 
 
 ## 🧩 Hardware fechado
@@ -185,6 +185,41 @@ específico** após mudança de hardware.
 > `git push origin :refs/tags/vX.Y.Z`), corrija em branch, merge, então
 > `git tag -a vX.Y.Z -F tag_msg.txt && git push origin vX.Y.Z`.
 
+
+### 11. `FlashFreq` não é parâmetro válido do FQBN para `esp32s3` (v3.3.11)
+
+Apenas o `esp32` clássico aceita `FlashFreq` no FQBN. No `esp32s3` o
+parâmetro é silenciosamente ignorado por algumas versões e rejeitado
+por outras (erro `Invalid option`).
+
+**Regra**: antes de adicionar qualquer opção ao FQBN, validar com
+`arduino-cli board details -b esp32:esp32:esp32s3`.
+
+### 12. USB-CDC nativo + auto-reset é frágil no S3-Zero (v3.3.11)
+
+Com `USBMode=hwcdc` + `CDCOnBoot=cdc`, o handshake DTR/RTS do
+`arduino-cli` para entrar em download mode falha em ~30% das tentativas,
+deixando o chip em boot loop. **Sempre ter fallback manual documentado**
+(GPIO0 + RESET) — e preferir Tera Term/PuTTY ao `arduino-cli monitor`
+para debug serial pós-flash.
+
+## Estado atual (2026-05-13, v3.3.11)
+
+- **Firmware:** v3.3.11 (fail-safe, S3-Zero target)
+- **Core:** arduino-esp32 `2.0.14` (fixado em workflows e build local)
+- **Toolchain:** `arduino-cli` + PowerShell (`flash.ps1`)
+- **Hardware:** ESP32-S3-Zero (sem PSRAM, 4MB flash, USB-CDC nativo)
+
+### Configuração de build validada
+
+```powershell
+$fqbn = "esp32:esp32:esp32s3:" + `
+        "USBMode=hwcdc," + `
+        "CDCOnBoot=cdc," + `
+        "FlashMode=qio," + `
+        "FlashSize=4M," + `
+        "PartitionScheme=default," + `
+        "PSRAM=disabled"
 
 ## 🔄 Fluxo de release validado
 
