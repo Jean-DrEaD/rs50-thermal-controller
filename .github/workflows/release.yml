@@ -1,85 +1,79 @@
-name: Build & Release RS50 Thermal
+name: Release Build
 
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - 'v*.*.*'
 
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install PlatformIO
+      - name: Install ESP32 core (pinned 2.0.14)
         run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade platformio
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@2.0.14
 
-      - name: Cache PlatformIO
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.platformio/.cache
-            ~/.platformio/packages
-            ~/.platformio/platforms
-          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
-          restore-keys: |
-            ${{ runner.os }}-pio-
-
-      - name: Generate config.h from example
+      - name: Install libraries from ci/libraries.txt
         run: |
-          if [ ! -f src/rs50_thermal/config.h.example ]; then
-            echo "ERRO: config.h.example não encontrado!"
-            exit 1
-          fi
+          while IFS= read -r lib || [ -n "$lib" ]; do
+            [ -z "$lib" ] && continue
+            case "$lib" in \#*) continue ;; esac
+            echo "Installing: $lib"
+            arduino-cli lib install "$lib"
+          done < ci/libraries.txt
+
+      - name: Stage config.h from example
+        run: |
           cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
-          sed -i "s|__WIFI_SSID__|${{ secrets.WIFI_SSID }}|g" src/rs50_thermal/config.h
-          sed -i "s|__WIFI_PASS__|${{ secrets.WIFI_PASS }}|g" src/rs50_thermal/config.h
-          echo "✅ config.h gerado com sucesso"
-          echo "--- Conteúdo (sem secrets) ---"
-          grep -v "WIFI_" src/rs50_thermal/config.h || true
 
-      - name: Build firmware
-        run: pio run
-
-      - name: Prepare artifacts
+      - name: Compile firmware
         run: |
-          mkdir -p artifacts
-          cp .pio/build/*/firmware.bin artifacts/ 2>/dev/null || true
-          cp .pio/build/*/firmware.elf artifacts/ 2>/dev/null || true
-          ls -la artifacts/
+          mkdir -p release
+          arduino-cli compile \
+            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled" \
+            --output-dir ./release/rs50_thermal \
+            src/rs50_thermal
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware-${{ github.ref_name }}
-          path: artifacts/
-          retention-days: 30
+      - name: Locate and rename artifacts
+        id: artifacts
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          APP=$(find ./release -name "*.ino.bin" | head -1)
+          BOOT=$(find ./release -name "*.bootloader.bin" | head -1)
+          PART=$(find ./release -name "*.partitions.bin" | head -1)
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+          cp "$APP"  "./release/rs50_thermal_v${VERSION}.bin"
+          cp "$BOOT" "./release/rs50_thermal_v${VERSION}_bootloader.bin"
+          cp "$PART" "./release/rs50_thermal_v${VERSION}_partitions.bin"
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*
-          generate_release_notes: true
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            release/rs50_thermal_v${{ steps.artifacts.outputs.version }}.bin
+            release/rs50_thermal_v${{ steps.artifacts.outputs.version }}_bootloader.bin
+            release/rs50_thermal_v${{ steps.artifacts.outputs.version }}_partitions.bin
+          body: |
+            ## RS50 Thermal Controller — v${{ steps.artifacts.outputs.version }}
+
+            ### Modos de gravação
+            - **Atualização** (só app): grave `rs50_thermal_v${{ steps.artifacts.outputs.version }}.bin` em `0x10000`
+            - **Flash completo** (recovery): grave os 3 binários
+              - `bootloader.bin` → `0x0`
+              - `partitions.bin` → `0x8000`
+              - `*.bin` (app)    → `0x10000`
+            - **Web Flasher**: arraste os 3 `.bin` na ferramenta web
+
+            Ver `CHANGELOG.md` para detalhes desta versão.
