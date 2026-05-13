@@ -1,54 +1,54 @@
-name: Build RS50 Thermal
+name: Build Firmware ESP32
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1
-        with:
-          version: latest
 
-      - name: Configure Arduino CLI
+      - name: Configurar URL do core ESP32
         run: |
-          arduino-cli config init
-          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index
 
-      - name: Install ESP32 core (2.0.14)
-        run: |
-          arduino-cli core install esp32:esp32@2.0.14
-          arduino-cli core list
+      - name: Instalar core ESP32 (fixado em 2.0.14)
+        run: arduino-cli core install esp32:esp32@2.0.14
 
-      - name: Install libraries
+      - name: Instalar bibliotecas (ci/libraries.txt)
         run: |
-          while IFS= read -r lib; do
-            # ignora linhas vazias e comentários
-            [ -z "$lib" ] && continue
-            case "$lib" in \#*) continue ;; esac
-            echo "Installing: $lib"
-            arduino-cli lib install "$lib"
+          while IFS= read -r line || [ -n "$line" ]; do
+            # ignora comentários e linhas vazias
+            case "$line" in
+              ''|\#*) continue ;;
+            esac
+            echo "Instalando: $line"
+            arduino-cli lib install "$line"
           done < ci/libraries.txt
-          arduino-cli lib list
 
-      - name: Compile firmware
+      - name: Compilar firmware
         run: |
           arduino-cli compile \
             --fqbn esp32:esp32:esp32 \
-            --warnings default \
-            --verbose \
-            src/rs50_thermal/rs50_thermal.ino
+            --output-dir build \
+            src/
 
-      - name: Run pre-commit hooks
-        run: |
-          pip install pre-commit
-          pre-commit run --all-files || echo "pre-commit not configured, skipping"
+      - name: Upload artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp32
+          path: build/*.bin
+          retention-days: 30
