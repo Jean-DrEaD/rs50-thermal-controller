@@ -1,0 +1,7 @@
+# Bibliotecas do firmware RS50 Thermal
+# Formato: Nome@versão (versão opcional)
+WebSockets@2.4.1
+Adafruit GFX Library
+Adafruit SSD1306
+Adafruit BusIO
+ArduinoJson
