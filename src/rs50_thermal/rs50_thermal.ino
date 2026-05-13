@@ -1,5 +1,5 @@
 //
-//  RS50 Thermal Controller v3.3.9
+// RS50 Thermal Controller v3.3.9
 //  Firmware ESP32 — NTC + PWM + Relé fail-safe + Dashboard WS + UDP SimHub
 //  © 2026 — github.com/<owner>/rs50-thermal-controller
 //
