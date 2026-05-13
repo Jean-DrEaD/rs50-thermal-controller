@@ -1,7 +1,7 @@
 # RS50 Thermal Controller — Context
 
 > Documento curto para retomar o projeto rapidamente.
-> Última atualização: 2026-05-13 (v3.3.9).
+> Última atualização: 2026-05-13 (v3.3.10).
 
 ## 🎯 Objetivo
 
@@ -11,7 +11,8 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 
 ## 📍 Status atual
 
-- **Software**: ✅ v3.3.9 publicada, CI verde, release oficial no GitHub
+- **Software**: ✅ v3.3.10 publicada, CI verde, release oficial no GitHub
+- **Config**: ✅ pinout, thresholds e macros sincronizados com hardware real
 - **CI/Build**: ✅ core ESP32 fixado em `2.0.14`, libs inline nos workflows
 - **Hardware**: 🔧 aguardando montagem física e bring-up
 - **Próximo passo**: montar protótipo na bancada → validar fail-safe → debug
@@ -30,13 +31,16 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 
 ## 🔌 Pinout ESP32-S3-Zero
 
-| GPIO | Função | Notas |
-| --- | --- | --- |
-| 1 | NTC ADC | divisor 100k + cap 100nF |
-| 4 | Gate MOSFET | 220Ω + pull-down 10k |
-| 5 | PWM Fan | 25kHz, 3.3V direto |
-| 9 | WS2812 Data | 330Ω série |
-| 21 | ⚠️ NÃO USAR | LED RGB onboard |
+| GPIO | Função | Macro | Notas |
+| --- | --- | --- | --- |
+| 1 | NTC ADC | `PIN_NTC` | divisor 100k + cap 100nF |
+| 4 | Gate MOSFET | `PIN_RELAY` | 220Ω + pull-down 10k |
+| 5 | PWM Fan | `PIN_PWM` | 25kHz, 3.3V direto |
+| 9 | WS2812 Data | `PIN_WS2812` | 330Ω série, `LED_COUNT=5` |
+| 21 | ⚠️ NÃO USAR | — | LED RGB onboard |
+
+> ⚠️ I2C **não é usado** em v3.x. `Wire.h`, `PIN_SDA`, `PIN_SCL` foram
+> removidos em v3.3.10. Se precisar no futuro, escolher GPIOs livres.
 
 
 ## 🛡 Topologia fail-safe
@@ -47,15 +51,18 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 - Shutdown: GPIO4=HIGH → MOSFET ON → bobina energiza → NC abre → motor para
 
 
-## 🌡 Thresholds de temperatura
+## 🌡 Thresholds de temperatura (v3.3.10+)
 
-| Faixa | Estado | Ação |
-| --- | --- | --- |
-| < 40°C | Repouso | Fan OFF, LED verde |
-| 40–60°C | Fan Ramp | PWM proporcional, LED azul |
-| 60–68°C | Fan Max | PWM 100%, LED amarelo |
-| ≥ 68°C | **Shutdown** | Motor cortado, LED vermelho |
-| < 63°C (pós-shutdown) | Religa | Histerese de 5°C |
+| Faixa | Estado | Ação | Macro |
+| --- | --- | --- | --- |
+| < 40°C | IDLE | Fan OFF, LED verde | `TEMP_IDLE` |
+| 40–60°C | WARMING | PWM proporcional, LED azul | `TEMP_WARMING` |
+| 60–68°C | WARNING | PWM 100%, LED amarelo | `TEMP_WARNING` |
+| ≥ 68°C | **CRITICAL** | Motor cortado, LED vermelho | `TEMP_CRITICAL` |
+| < 63°C (pós-shutdown) | Religa | Histerese de 5°C | `TEMP_RESTART` |
+
+- `PWM_MIN = 0` (fan desliga em repouso — menos sujeira no cooler)
+- `THERMAL_HYSTERESIS = 5.0f`
 
 
 ## 🛠 Stack de software
@@ -66,26 +73,28 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 - **PWM**: API `ledcSetup` + `ledcAttachPin` (core 2.x)
   ⚠️ NÃO usar `ledcAttach` (essa é da core 3.x)
 - **Dashboard Web**: HTML/CSS/JS embutido em `dashboard.h` (raw literal C++)
+- **Telemetria**: WebSocket (porta 81) + UDP broadcast (porta 33333 para SimHub)
 
 
 ## 📂 Estrutura
 
 ```
 .
-├── README.md                       ← visão geral + diagramas Mermaid + banner
-├── CHANGELOG.md                    ← histórico (Keep a Changelog)
-├── CONTEXT.md                      ← este arquivo
-├── docs/
-│   ├── banner.svg                  ← banner do projeto (usado no README)
-│   └── wiring-schematic.svg        ← export Fritzing breadboard
-├── src/
-│   └── rs50_thermal/
-│       ├── rs50_thermal.ino        ← firmware principal
-│       ├── config.h                ← FW_VERSION + macros
-│       └── dashboard.h             ← HTML/CSS/JS do dashboard web
-├── hardware/                       ← KiCad PCB (sem planos ativos no v3.x)
-└── .github/
-    └── workflows/                  ← CI (Arduino Build & Validate + Release Build)
+├── README.md ← visão geral + diagramas Mermaid + banner 
+├── CHANGELOG.md ← histórico (Keep a Changelog) 
+├── CONTEXT.md ← este arquivo 
+├── docs/ 
+│    ├── banner.svg ← banner do projeto (usado no README) 
+│    └── wiring-schematic.svg ← export Fritzing breadboard 
+├── src/ 
+│    └── rs50_thermal/ 
+│        ├── rs50_thermal.ino ← firmware principal 
+│        ├── config.h ← FW_VERSION + macros 
+│        └── dashboard.h ← HTML/CSS/JS do dashboard web 
+├── hardware/ ← KiCad PCB (sem planos ativos no v3.x) 
+└── .github/ 
+     └── workflows/ ← CI (Arduino Build & Validate + Release Build)
+
 ```
 
 ## 🎓 Lições aprendidas (gotchas do build)
@@ -132,11 +141,8 @@ Não o commit que ela aponta. Pra resolver até o commit: `git ls-remote origin 
 ### 6. Fixar versão do core ESP32 no CI
 
 Builds "verdes" hoje podem quebrar amanhã se a Espressif lançar core 3.x e o
-CI pegar a `latest`. **Sempre fixar** a versão exata:
+CI pegar a `latest`. **Sempre fixar** a versão exata: run: arduino-cli core install esp32:esp32@2.0.14
 
-```
-- run: arduino-cli core install esp32:esp32@2.0.14
-```
 
 Mesma regra vale pras libs — fixar versão explícita no workflow. Isso
 garante reprodutibilidade total entre máquina local e CI.
@@ -150,6 +156,31 @@ pode causar falha de build se a lib não estiver instalada.
 **Regra**: se não está em uso, **deletar a linha** — não comentar.
 Se quiser um lembrete de dependência futura, documentar no CONTEXT ou CHANGELOG.
 
+### 8. Macros redefinidas em `.ino` × `config.h` (v3.3.10)
+
+Se o `.ino` redefine uma macro já vinda do `config.h` (ex: `#define UDP_PORT 33339`
+sobrescrevendo o `33333` do header), o compilador emite warning mas **usa a última
+definição** — gerando divergência silenciosa entre código e documentação.
+
+**Regra**: nunca redefinir no `.ino` algo que já vem do `config.h`.
+Single source of truth: **sempre no `config.h`**.
+
+### 9. README pode prometer macros que o código não tem (v3.3.10)
+
+O README dizia "configure `LED_COUNT` em `config.h`" mas a macro **não existia**
+no header — usuário ficava perdido. Sempre que mexer no README mencionando
+configuração, **verificar grep no `config.h`** se a macro realmente existe.
+
+**Regra**: README e `config.h` devem estar sempre sincronizados — qualquer
+macro mencionada como "configurável" precisa existir e ter valor padrão sensato.
+
+### 10. Pinout do `config.h` precisa bater com o MCU real (v3.3.10)
+
+Migrar de ESP32 clássico para ESP32-S3-Zero **sem revisar o pinout** gera
+código que compila mas não funciona (ex: `PIN_NTC=34` não existe no S3-Zero).
+Pinos diferem entre famílias ESP32 — **sempre validar contra datasheet do MCU
+específico** após mudança de hardware.
+
 > 💡 Recriar tag após hotfix: apague local+remota (`git tag -d vX.Y.Z` +
 > `git push origin :refs/tags/vX.Y.Z`), corrija em branch, merge, então
 > `git tag -a vX.Y.Z -F tag_msg.txt && git push origin vX.Y.Z`.
@@ -158,14 +189,15 @@ Se quiser um lembrete de dependência futura, documentar no CONTEXT ou CHANGELOG
 ## 🔄 Fluxo de release validado
 
 1. Bump `FW_VERSION` em `src/rs50_thermal/config.h`
-2. Commit em branch `hotfix/X` ou `feat/X` (nunca direto na main)
-3. Push da branch → abrir PR
-4. Aguardar CI verde (Arduino Build & Validate)
-5. Merge na main (Squash recomendado)
-6. `git pull` + `git tag -a vX.Y.Z -F tag_msg.txt`
-7. `git push origin vX.Y.Z`
-8. Workflow Release Build dispara automaticamente
-9. Release publicada com `.bin` anexado
+2. Atualizar header do `.ino` (linha 2 — validado pelo pre-commit hook)
+3. Commit em branch `hotfix/X` ou `feat/X` (nunca direto na main)
+4. Push da branch → abrir PR (`gh pr create --fill --base main`)
+5. Aguardar CI verde (Arduino Build & Validate)
+6. Merge na main via squash (`gh pr merge N --squash --delete-branch`)
+7. `git pull` + criar `tag_msg.txt` + `git tag -a vX.Y.Z -F tag_msg.txt`
+8. `git push origin vX.Y.Z`
+9. Workflow Release Build dispara automaticamente
+10. Release publicada com `.bin`, `.elf`, bootloader e partitions anexados
 
 
 ## ❌ Fora de escopo (v3.x)
@@ -186,7 +218,7 @@ Ordem sugerida pra debug incremental — só avança se a anterior passar:
 - [ ] **2. + ESP32-S3**: confirma boot, USB serial responde
 - [ ] **3. + NTC**: valida ADC contra termômetro de referência
 - [ ] **4. + Fan PWM**: testa 3 faixas (off / ramp / max)
-- [ ] **5. + WS2812**: confirma cores em cada estado
+- [ ] **5. + WS2812**: confirma cores em cada estado (`LED_COUNT=5`)
 - [ ] **6. + Relé com carga fake** (LED+resistor): valida shutdown
 - [ ] **7. + MKS + motor real**: teste fail-safe completo
 - [ ] **8. Calibração da curva NTC**: banho quente + termômetro padrão
