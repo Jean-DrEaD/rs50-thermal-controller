@@ -16,7 +16,9 @@
 #include "config.h"
 #include "dashboard.h"
 
-bool relayOn = false;
+// Broadcast da sua rede local (ajuste conforme sua sub-rede)
+IPAddress UDP_BROADCAST_IP(255, 255, 255, 255);
+#define UDP_PORT 33339   // ou a porta que você usa
 
 // ---------- Display ----------
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
