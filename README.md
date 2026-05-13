@@ -212,6 +212,7 @@ sequenceDiagram
 │       └── dashboard.h          ← HTML/CSS/JS do dashboard web
 ├── hardware/                    ← KiCad PCB
 └── .github/workflows/           ← CI (compile firmware)
+
 ```
 
 ## 📜 Licença
