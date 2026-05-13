@@ -49,3 +49,8 @@ scripts/
 # ─── KiCad ───────────────────────────────────────────────────────────────────
 hardware/rs50-thermal-backups/
 hardware/*.kicad_prl
+
+config.h
+build/
+*.bin
+config.h
