@@ -1,5 +1,5 @@
 //
-// RS50 Thermal Controller v3.3.9
+// RS50 Thermal Controller v3.3.10
 //  Firmware ESP32 — NTC + PWM + Relé fail-safe + Dashboard WS + UDP SimHub
 //  © 2026 — github.com/<owner>/rs50-thermal-controller
 //
@@ -8,7 +8,6 @@
 #include <WiFiUdp.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <Wire.h>
 #include <math.h>
 
 #include "config.h"
@@ -16,7 +15,6 @@
 
 // Broadcast da sua rede local (ajuste conforme sua sub-rede)
 IPAddress UDP_BROADCAST_IP(255, 255, 255, 255);
-#define UDP_PORT 33339   // ou a porta que você usa
 
 // ---------- Rede ----------
 WiFiUDP udp;
@@ -55,7 +53,7 @@ float readNTC() {
   float adc = acc / (float)samples;
   if (adc <= 0) adc = 1;
 
-  // Divisor: NTC -> GND, R_SERIES -> 3V3
+  // Divisor: NTC -> GND, NTC_SERIES_R -> 3V3
   float r = NTC_SERIES_R * (adc / (ADC_MAX - adc));
   float lnR = logf(r / NTC_NOMINAL_R);
   float invT = (1.0f / NTC_NOMINAL_T) + (lnR / NTC_BETA);
@@ -102,6 +100,7 @@ void setupPWM() {
 }
 
 void applyDuty(uint8_t duty) {
+   if (duty == 0) { ledcWrite(PWM_CHANNEL_FAN, 0); return; }
   uint32_t maxVal = (1 << PWM_RESOLUTION) - 1;
   uint32_t raw = (duty * maxVal) / 100;
   ledcWrite(PWM_CHANNEL_FAN, raw);
@@ -175,8 +174,7 @@ void setup() {
   digitalWrite(PIN_RELAY, LOW);
   analogReadResolution(12);
 
-  Wire.begin(PIN_SDA, PIN_SCL);
-  
+
   setupPWM();
   setupWiFi();
 

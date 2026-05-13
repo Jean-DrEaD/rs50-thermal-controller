@@ -8,13 +8,11 @@
 // ---------- Firmware Version ----------
 // IMPORTANTE: manter no formato "3.3.X" — validado pelo hook .githooks/pre-commit
 // e pela linha 2 de rs50_thermal.ino (// RS50 Thermal Controller vX.Y.Z)
-
-// Firmware Version
-#define FW_VERSION        "3.3.9"
+#define FW_VERSION        "3.3.10"
 
 // ---------- Wi-Fi ----------
-#define WIFI_SSID         "SUA_REDE_WIFI"
-#define WIFI_PASS         "SUA_SENHA_WIFI"
+#define WIFI_SSID         "SEU_SSID_AQUI"
+#define WIFI_PASS         "SUA_SENHA_AQUI"
 #define WIFI_HOSTNAME     "rs50"
 
 // ---------- Portas de rede ----------
@@ -22,54 +20,51 @@
 #define WS_PORT           81
 #define UDP_PORT          33333      // Porta UDP para SimHub
 
-// ---------- Pinos ESP32 ----------
-#define PIN_NTC           34         // ADC1_CH6 (entrada analógica)
-#define PIN_PWM           25         // Saída PWM para cooler/fan
-#define PIN_RELAY         26         // Saída digital relé (NC fail-safe)
-#define PIN_SDA           21         // I2C bus
-#define PIN_SCL           22         // I2C bus
+// ---------- Pinos ESP32-S3-Zero ----------
+// ⚠️ GPIO 21 reservado (LED RGB onboard) — NÃO USAR
+#define PIN_NTC           1          // ADC1_CH0, divisor 100k + cap 100nF
+#define PIN_RELAY         4          // Gate MOSFET (220Ω + pull-down 10k)
+#define PIN_PWM           5          // PWM Fan 25kHz (3.3V direto)
+#define PIN_WS2812        9          // Data WS2812 (330Ω série)
+#define PIN_SDA           8          // I2C bus (livre — futuro)
+#define PIN_SCL           7          // I2C bus (livre — futuro)
+
+// ---------- WS2812 / Status LEDs ----------
+#define LED_COUNT         5          // 1–5 LEDs suportados
+#define LED_BRIGHTNESS    64         // 0-255
 
 // ---------- PWM ----------
 #define PWM_CHANNEL_FAN   0
 #define PWM_FREQ          25000      // 25 kHz (silencioso, fora do audível)
 #define PWM_RESOLUTION    8          // 8 bits (0-255)
-#define PWM_MIN           20         // % mínimo (cooler nunca para)
+#define PWM_MIN           0          // % mínimo (fan desliga em IDLE)
 #define PWM_MAX           100        // % máximo
 
-// ---------- NTC (Steinhart-Hart) ----------
+// ---------- NTC 100k B3950 (Steinhart-Hart) ----------
 #define ADC_MAX           4095.0f    // ESP32 ADC 12 bits
-#define NTC_SERIES_R      10000.0f   // Resistor série 10k
-#define NTC_NOMINAL_R     10000.0f   // NTC 10k @ 25°C
+#define NTC_SERIES_R      100000.0f  // Resistor série 100k
+#define NTC_NOMINAL_R     100000.0f  // NTC 100k @ 25°C
 #define NTC_NOMINAL_T     298.15f    // 25°C em Kelvin
-#define NTC_BETA          3950.0f    // Coeficiente Beta típico
+#define NTC_BETA          3950.0f    // Coeficiente Beta
 #define THERMAL_OFFSET    0.0f       // Ajuste fino de calibração (°C)
 
 // ---------- Filtragem ----------
 #define TEMP_FILTER_ALPHA 0.2f       // EMA: 0=lento, 1=rápido
-#define SAMPLE_INTERVAL_MS 500       // Amostragem do NTC
-#define TELEMETRY_INTERVAL_MS 1000   // Envio WebSocket/UDP
+#define SAMPLE_INTERVAL_MS 500
+#define TELEMETRY_INTERVAL_MS 1000
 
-// ---------- Limiares térmicos (°C) ----------
-#define TEMP_IDLE         30.0f      // Abaixo disto: IDLE
-#define TEMP_WARMING      45.0f      // Início aquecimento
-#define TEMP_WARNING      65.0f      // Atenção
-#define TEMP_CRITICAL     80.0f      // Crítico → aciona relé
+// ---------- Limiares térmicos (°C) — alinhados ao CONTEXT.md ----------
+#define TEMP_IDLE         40.0f      // < 40°C: Fan OFF
+#define TEMP_WARMING      40.0f      // 40-60°C: PWM ramp
+#define TEMP_WARNING      60.0f      // 60-68°C: PWM 100%
+#define TEMP_CRITICAL     68.0f      // ≥ 68°C: shutdown relé
+#define TEMP_RESTART      63.0f      // Religa abaixo disto (histerese 5°C)
 #define TEMP_MIN          TEMP_IDLE
 #define TEMP_MAX          TEMP_CRITICAL
-#define THERMAL_HYSTERESIS 2.0f      // Histerese para evitar oscilação
+#define THERMAL_HYSTERESIS 5.0f      // Histerese (CONTEXT.md)
 
 // ---------- Relé ----------
-extern bool relayOn;                 // Flag global de estado do relé
-
-// ---------- Helpers ----------
-inline const char* stateName(int s) {
-  switch (s) {
-    case 0: return "IDLE";
-    case 1: return "WARMING";
-    case 2: return "WARNING";
-    case 3: return "CRITICAL";
-    default: return "UNKNOWN";
-  }
-}
+// HIGH = aciona MOSFET = abre NC = corta +24V da MKS
+extern bool relayOn;
 
 #endif // CONFIG_H
