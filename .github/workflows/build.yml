@@ -1,0 +1,54 @@
+name: Build Firmware ESP32
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+
+      - name: Configurar URL do core ESP32
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config add board_manager.additional_urls \
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+
+      - name: Instalar core ESP32 (fixado em 2.0.14)
+        run: arduino-cli core install esp32:esp32@2.0.14
+
+      - name: Instalar bibliotecas (ci/libraries.txt)
+        run: |
+          while IFS= read -r line || [ -n "$line" ]; do
+            # ignora comentários e linhas vazias
+            case "$line" in
+              ''|\#*) continue ;;
+            esac
+            echo "Instalando: $line"
+            arduino-cli lib install "$line"
+          done < ci/libraries.txt
+
+      - name: Compilar firmware
+        run: |
+          arduino-cli compile \
+            --fqbn esp32:esp32:esp32 \
+            --output-dir build \
+            src/
+
+      - name: Upload artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp32
+          path: build/*.bin
+          retention-days: 30

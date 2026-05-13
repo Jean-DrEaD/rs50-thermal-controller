@@ -1,7 +1,7 @@
 # RS50 Thermal Controller — Context
 
 > Documento curto para retomar o projeto rapidamente.
-> Última atualização: 2026-05-07 (v3.3.8).
+> Última atualização: 2026-05-12 (v3.3.8 + CI refactor).
 
 ## 🎯 Objetivo
 
@@ -12,6 +12,7 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 ## 📍 Status atual
 
 - **Software**: ✅ v3.3.8 publicada, CI verde, release oficial no GitHub
+- **CI/Build**: ✅ core ESP32 fixado em `2.0.14`, libs centralizadas em `ci/libraries.txt`
 - **Hardware**: 🔧 aguardando montagem física e bring-up
 - **Próximo passo**: montar protótipo na bancada → validar fail-safe → debug
 
@@ -27,13 +28,13 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 
 ## 🔌 Pinout ESP32-S3-Zero
 
-| GPIO | Função | Notas |
-|---|---|---|
-| 1 | NTC ADC | divisor 100k + cap 100nF |
-| 4 | Gate MOSFET | 220Ω + pull-down 10k |
-| 5 | PWM Fan | 25kHz, 3.3V direto |
-| 9 | WS2812 Data | 330Ω série |
-| 21 | ⚠️ NÃO USAR | LED RGB onboard |
+| GPIO | Função       | Notas                          |
+|------|--------------|--------------------------------|
+| 1    | NTC ADC      | divisor 100k + cap 100nF       |
+| 4    | Gate MOSFET  | 220Ω + pull-down 10k           |
+| 5    | PWM Fan      | 25kHz, 3.3V direto             |
+| 9    | WS2812 Data  | 330Ω série                     |
+| 21   | ⚠️ NÃO USAR  | LED RGB onboard                |
 
 ## 🛡 Topologia fail-safe
 
@@ -44,38 +45,44 @@ hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
 
 ## 🌡 Thresholds de temperatura
 
-| Faixa | Estado | Ação |
-|---|---|---|
-| < 40°C | Repouso | Fan OFF, LED verde |
-| 40–60°C | Fan Ramp | PWM proporcional, LED azul |
-| 60–68°C | Fan Max | PWM 100%, LED amarelo |
-| ≥ 68°C | **Shutdown** | Motor cortado, LED vermelho |
-| < 63°C (após shutdown) | Religa | Histerese de 5°C |
+| Faixa                  | Estado     | Ação                          |
+|------------------------|------------|-------------------------------|
+| < 40°C                 | Repouso    | Fan OFF, LED verde            |
+| 40–60°C                | Fan Ramp   | PWM proporcional, LED azul    |
+| 60–68°C                | Fan Max    | PWM 100%, LED amarelo         |
+| ≥ 68°C                 | **Shutdown** | Motor cortado, LED vermelho |
+| < 63°C (pós-shutdown)  | Religa     | Histerese de 5°C              |
 
 ## 🛠 Stack de software
 
 - **Arduino IDE 2.x** + `arduino-cli` no CI (GitHub Actions)
-- **ESP32 Arduino Core**: `2.0.14` (estável)
-- **FastLED**: 3.6.x (WS2812)
+- **ESP32 Arduino Core**: `2.0.14` (fixado — ver `ci/libraries.txt` e `build.yml`)
+- **FastLED**: 3.6.x (WS2812) — versão fixada em `ci/libraries.txt`
 - **PWM**: API `ledcSetup` + `ledcAttachPin` (core 2.x)
   ⚠️ NÃO usar `ledcAttach` (essa é da core 3.x)
 - **Dashboard Web**: HTML/CSS/JS embutido em `dashboard.h` (raw literal C++)
 
 ## 📂 Estrutura
 
-    .
-    ├── README.md              ← visão geral + diagramas Mermaid + banner
-    ├── CHANGELOG.md           ← histórico (Keep a Changelog)
-    ├── CONTEXT.md             ← este arquivo
-    ├── docs/
-    │   ├── banner.svg         ← banner do projeto (usado no README)
-    │   └── wiring-schematic.svg  ← export Fritzing breadboard
-    ├── src/rs50_thermal/
-    │   ├── rs50_thermal.ino   ← firmware principal
-    │   ├── config.h           ← FW_VERSION + macros
-    │   └── dashboard.h        ← HTML/CSS/JS do dashboard web
-    ├── hardware/              ← KiCad PCB (sem planos ativos no v3.x)
-    └── .github/workflows/     ← CI (Arduino Build & Validate + Release Build)
+```text
+.
+├── README.md                       ← visão geral + diagramas Mermaid + banner
+├── CHANGELOG.md                    ← histórico (Keep a Changelog)
+├── CONTEXT.md                      ← este arquivo
+├── ci/
+│   └── libraries.txt               ← libs + versões fixadas usadas no CI
+├── docs/
+│   ├── banner.svg                  ← banner do projeto (usado no README)
+│   └── wiring-schematic.svg        ← export Fritzing breadboard
+├── src/
+│   └── rs50_thermal/
+│       ├── rs50_thermal.ino        ← firmware principal
+│       ├── config.h                ← FW_VERSION + macros
+│       └── dashboard.h             ← HTML/CSS/JS do dashboard web
+├── hardware/                       ← KiCad PCB (sem planos ativos no v3.x)
+└── .github/
+    └── workflows/                  ← CI (Arduino Build & Validate + Release Build)
+```
 
 ## 🎓 Lições aprendidas (gotchas do build)
 
@@ -118,6 +125,19 @@ e usar `git commit -F commit_msg.txt`.
 
 Não o commit que ela aponta. Pra resolver até o commit:
 `git ls-remote origin "refs/tags/v3.3.8^{}"`
+
+### 6. Fixar versão do core ESP32 no CI
+
+Builds "verdes" hoje podem quebrar amanhã se a Espressif lançar core 3.x e o
+CI pegar a `latest`. **Sempre fixar** a versão exata:
+
+```yaml
+- run: arduino-cli core install esp32:esp32@2.0.14
+```
+
+Mesma regra vale pras libs — centralizadas em `ci/libraries.txt` (uma por
+linha no formato `Nome@versão`) e instaladas em loop pelo workflow. Isso
+garante reprodutibilidade total entre máquina local e CI.
 
 ## 🔄 Fluxo de release validado (v3.3.8)
 

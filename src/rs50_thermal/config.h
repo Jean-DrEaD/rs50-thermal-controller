@@ -1,143 +1,75 @@
-// ════════════════════════════════════════════════════════════════════════════
-//  RS50 Thermal Controller — config.h
-//  Version: 3.3.8
-//  Author: DrEaD (Joinville/SC)
-//  Hardware: ESP32-S3-Zero Waveshare + NTC 100K B3950 + Songle SLA-24VDC-SL-C
-//  Target: Volante DD RS50 Clone + Hoverboard 15Nm + ODESC FFBeast
-// ════════════════════════════════════════════════════════════════════════════
-
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define FW_VERSION "3.3.8"
-#define FW_NAME    "RS50-Thermal"
+// =====================================================
+// RS50 Thermal Controller - Configuração Global
+// =====================================================
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  PINOS — ESP32-S3-Zero Waveshare
-// ═══════════════════════════════════════════════════════════════════════════
-#define PIN_PWM         5     // Fan PWM (4-pin, sinal azul)
-#define PIN_NTC         1     // ADC1_CH0 — NTC no eixo
-#define PIN_RELAY       4     // Driver MOSFET do relé
-#define PIN_LED_RGB     21    // WS2812 onboard (e/ou strip externa)
+// ---------- Firmware Version ----------
+// IMPORTANTE: manter no formato "3.3.X" — validado pelo hook .githooks/pre-commit
+// e pela linha 2 de rs50_thermal.ino (// RS50 Thermal Controller vX.Y.Z)
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  LEDs ENDEREÇÁVEIS — escolha quantos vai usar
-// ═══════════════════════════════════════════════════════════════════════════
-//  1 LED  → onboard apenas (estado simples por cor)
-//  3 LEDs → barra: [estado] [temperatura] [fan]
-//  5 LEDs → termômetro vertical (gradiente verde→vermelho)
-//  N LEDs → modo termômetro estendido
-// ═══════════════════════════════════════════════════════════════════════════
-#define LED_COUNT          1            // ⚙️ AJUSTE AQUI: 1, 3, 5 ou mais
-#define LED_COLOR_ORDER    GRB           // Waveshare = GRB!
-#define LED_TYPE           WS2812B
-#define LED_BRIGHTNESS_MAX 80
-#define LED_BRIGHTNESS_NORMAL 3          // Quase invisível em NORMAL
-#define LED_BRIGHTNESS_INFO   25
+// Firmware Version
+#define FW_VERSION        "3.3.9"
 
-// Modos automáticos (não mexer):
-#define LED_MODE_SINGLE      (LED_COUNT == 1)
-#define LED_MODE_BAR         (LED_COUNT >= 3 && LED_COUNT <= 4)
-#define LED_MODE_THERMOMETER (LED_COUNT >= 5)
+// ---------- Wi-Fi ----------
+#define WIFI_SSID         "SUA_REDE_WIFI"
+#define WIFI_PASS         "SUA_SENHA_WIFI"
+#define WIFI_HOSTNAME     "rs50"
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  NTC HT-NTC100K B3950 (testado: 100kΩ @ 24°C ✅)
-// ═══════════════════════════════════════════════════════════════════════════
-#define R_FIXED         100000.0f
-#define NTC_BETA        3950.0f
-#define R_NTC_25C       100000.0f
-#define T_NOMINAL_K     298.15f
-#define VCC_ADC         3.3f
-#define ADC_RES         4095.0f
+// ---------- Portas de rede ----------
+#define WEB_PORT          80
+#define WS_PORT           81
+#define UDP_PORT          33333      // Porta UDP para SimHub
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  COMPENSAÇÃO TÉRMICA (eixo → estator)
-// ═══════════════════════════════════════════════════════════════════════════
-#define THERMAL_OFFSET    9.0f    // ⚠️ CALIBRAR após 1ª sessão (ver guia)
-#define LEAD_TIME_S       70.0f   // Antecipação em rampas térmicas
-#define DTDT_TRIGGER      0.04f   // °C/s mínimo para ativar lead time
+// ---------- Pinos ESP32 ----------
+#define PIN_NTC           34         // ADC1_CH6 (entrada analógica)
+#define PIN_PWM           25         // Saída PWM para cooler/fan
+#define PIN_RELAY         26         // Saída digital relé (NC fail-safe)
+#define PIN_SDA           21         // I2C OLED
+#define PIN_SCL           22         // I2C OLED
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  CURVA PWM DA FAN (perfil "casual + conforto térmico")
-// ═══════════════════════════════════════════════════════════════════════════
-#define TEMP_MIN          30.0f   // Liga discreto (proteger ímãs N35)
-#define TEMP_MAX          52.0f   // Fan 100% antes da zona de risco
-#define PWM_MIN           40      // % mínimo (sempre tem fluxo de ar)
-#define PWM_MAX           100
+// ---------- PWM ----------
+#define PWM_CHANNEL_FAN   0
+#define PWM_FREQ          25000      // 25 kHz (silencioso, fora do audível)
+#define PWM_RESOLUTION    8          // 8 bits (0-255)
+#define PWM_MIN           20         // % mínimo (cooler nunca para)
+#define PWM_MAX           100        // % máximo
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  HISTERESE & FILTROS
-// ═══════════════════════════════════════════════════════════════════════════
-#define TEMP_HYSTERESIS   1.5f    // Evita oscilação de PWM
-#define EMA_ALPHA         0.18f   // Filtro exponencial (0.1-0.3)
-#define DTDT_WINDOW_MS    30000   // Janela para cálculo de derivada
+// ---------- NTC (Steinhart-Hart) ----------
+#define ADC_MAX           4095.0f    // ESP32 ADC 12 bits
+#define NTC_SERIES_R      10000.0f   // Resistor série 10k
+#define NTC_NOMINAL_R     10000.0f   // NTC 10k @ 25°C
+#define NTC_NOMINAL_T     298.15f    // 25°C em Kelvin
+#define NTC_BETA          3950.0f    // Coeficiente Beta típico
+#define THERMAL_OFFSET    0.0f       // Ajuste fino de calibração (°C)
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  PROTEÇÃO MULTI-NÍVEL (limites por T_estator estimada)
-// ═══════════════════════════════════════════════════════════════════════════
-#define TEMP_WARNING      55.0f
-#define TEMP_CRITICAL     62.0f
-#define TEMP_SHUTDOWN     68.0f   // ACIONA RELÉ — corta 24V
-#define TEMP_RECOVERY     50.0f   // Religa só após esfriar
-#define ADC_FAULT_LO      50      // Detecção curto/aberto
-#define ADC_FAULT_HI      4045
+// ---------- Filtragem ----------
+#define TEMP_FILTER_ALPHA 0.2f       // EMA: 0=lento, 1=rápido
+#define SAMPLE_INTERVAL_MS 500       // Amostragem do NTC
+#define TELEMETRY_INTERVAL_MS 1000   // Envio WebSocket/UDP
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  RELÉ Songle SLA-24VDC-SL-C (SPDT, bobina 24V)
-// ═══════════════════════════════════════════════════════════════════════════
-//  Lógica fail-safe (NC):
-//    GPIO 4 LOW  = MOSFET OFF = bobina desenergizada = NC fechado = motor ON
-//    GPIO 4 HIGH = MOSFET ON  = bobina energizada    = NC aberto  = motor OFF
-//  Se ESP32 travar/resetar (GPIO floating com pull-down 10k) → motor LIGADO
-// ═══════════════════════════════════════════════════════════════════════════
-#define RELAY_FAILSAFE_NC   true
-#define SHUTDOWN_LATCH_MS   60000  // Mínimo 60s desligado
+// ---------- Limiares térmicos (°C) ----------
+#define TEMP_IDLE         30.0f      // Abaixo disto: IDLE
+#define TEMP_WARMING      45.0f      // Início aquecimento
+#define TEMP_WARNING      65.0f      // Atenção
+#define TEMP_CRITICAL     80.0f      // Crítico → aciona relé
+#define TEMP_MIN          TEMP_IDLE
+#define TEMP_MAX          TEMP_CRITICAL
+#define THERMAL_HYSTERESIS 2.0f      // Histerese para evitar oscilação
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  FAULT ADAPTATIVO (grace period varia com a temperatura)
-// ═══════════════════════════════════════════════════════════════════════════
-#define FAULT_GRACE_LOW     60000  // T<50°C → 60s tolerância
-#define FAULT_GRACE_MID     30000  // T 50-55°C → 30s
-#define FAULT_GRACE_HIGH    5000   // T>55°C → 5s
+// ---------- Relé ----------
+extern bool relayOn;                 // Flag global de estado do relé
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  CONTADOR DE HORAS (NVS — persiste após reset)
-// ═══════════════════════════════════════════════════════════════════════════
-#define HOUR_COUNTER_SAVE_INTERVAL 300000  // Salva a cada 5min
-#define ACTIVE_THRESHOLD_TEMP      35.0f   // T mín. para "uso ativo"
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  TIMINGS LED (refinados conforme feedback)
-// ═══════════════════════════════════════════════════════════════════════════
-#define CRITICAL_BLINK_MS   250    // 2Hz
-#define SHUTDOWN_STROBE_MS  80     // ~12Hz
-#define FAULT_STROBE_MS     200
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  AMOSTRAGEM
-// ═══════════════════════════════════════════════════════════════════════════
-#define SAMPLES           25
-#define UPDATE_INTERVAL   1500
-#define SERIAL_BAUD       115200
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  PWM HARDWARE (ESP32 LEDC — Arduino Core 2.0.x)
-// ═══════════════════════════════════════════════════════════════════════════
-#define PWM_FREQ          25000    // 25kHz — acima do audível
-#define PWM_RESOLUTION    8        // 8 bits → duty 0..255
-#define PWM_CHANNEL_FAN   0        // Canal LEDC dedicado ao fan
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  WIFI / DASHBOARD
-// ═══════════════════════════════════════════════════════════════════════════
-#define ENABLE_WIFI         true
-#define WIFI_SSID           "SuaRedeAqui"     // ⚙️ AJUSTAR
-#define WIFI_PASS           "SuaSenhaAqui"    // ⚙️ AJUSTAR
-#define WIFI_HOSTNAME       "rs50-thermal"
-#define WEB_PORT            80
-#define WS_PORT             81
-#define WS_UPDATE_MS        1000
-#define WIFI_RETRY_MS       30000   // Reconnect automático
+// ---------- Helpers ----------
+inline const char* stateName(int s) {
+  switch (s) {
+    case 0: return "IDLE";
+    case 1: return "WARMING";
+    case 2: return "WARNING";
+    case 3: return "CRITICAL";
+    default: return "UNKNOWN";
+  }
+}
 
 #endif // CONFIG_H
-

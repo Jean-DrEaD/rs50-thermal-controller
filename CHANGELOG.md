@@ -3,6 +3,47 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.9] — 2026-05-12
+
+### Added
+- 📡 **Telemetria SimHub via UDP broadcast** (`255.255.255.255:4242`):
+  ESP32 envia o frame `$SH;...` pra rede inteira, SimHub escuta na
+  mesma porta. **Zero configuração de IP** em ambos os lados.
+- **Fallback automático**: WiFi online → UDP broadcast | WiFi offline
+  → Serial (cabo USB / debug). Frame montado uma vez só com `snprintf`
+  e reutilizado pelos dois caminhos — sem duplicação.
+- Novas constantes em `config.h`: `SIMHUB_UDP_PORT = 4242`,
+  `ENABLE_SIMHUB`, `SIMHUB_OUTPUT_MS = 100` (10Hz).
+- Includes: `<WiFiUDP.h>` + objeto global `udpBroadcast`.
+- `setupWiFi()` agora inicializa também `udpBroadcast.begin(SIMHUB_UDP_PORT)`
+  junto com o `server.begin()` e `webSocket.begin()`.
+
+### Changed
+- `sendSimHubTelemetry()` reescrito para usar `snprintf` num buffer
+  único de 128 bytes, com fallback automático Serial↔UDP.
+- Frame SimHub estendido: agora inclui `dtdt`, `peak` e `hours` além
+  dos campos originais (`shaft`, `stator`, `fan`, `state`, `motor`).
+
+### Notes
+- ESP32 e PC com SimHub precisam estar na **mesma rede LAN**
+  (broadcast não atravessa roteadores — comportamento desejado).
+- No SimHub: `Devices → Add device → Custom UDP`, porta `4242`,
+  delimiter `\n`, mesmo parsing `$SH;key=value;` do Custom Serial.
+
+
+## [3.3.8] — 2026-05-07
+
+### Fixed
+- Hotfix CI - move HTML para dashboard.h separado
+- Move HTML_PAGE inteiro do .ino para src/rs50_thermal/dashboard.h
+- Usa delimitador unico DASHBOARD_RS50_V338 (em vez de rawliteral)
+- Reescreve JS removendo template literals e arrow functions
+- Usa concatenacao de strings e function() para maxima compatibilidade
+  com o parser do arduino-cli / ESP32 Core 2.0.14
+- Bump FW_VERSION 3.3.7 -> 3.3.8
+- Resolve erro: 'function' does not name a type (linha 496)
+- delimitador raw string respeitando limite de 16 chars
+
 ## [3.3.7] — 2026-05-06
 
 ### Fixed

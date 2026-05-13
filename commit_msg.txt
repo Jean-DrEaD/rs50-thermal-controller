@@ -1,0 +1,12 @@
+feat(simhub): UDP broadcast telemetry + fallback Serial (v3.3.9)
+
+- Telemetria SimHub agora usa UDP broadcast (255.255.255.255:4242)
+- Fallback automático: WiFi online → UDP, WiFi offline → Serial
+- Frame único montado com snprintf, reutilizado por ambos os caminhos
+- Inicialização do udpBroadcast no setupWiFi() junto com server/ws
+- Frame estendido: + dtdt, peak, hours
+- Zero configuração de IP — ESP32 e SimHub só precisam estar na mesma LAN
+
+Configurar no SimHub: Devices → Custom UDP → porta 4242, delimiter \n
+
+Bump FW_VERSION 3.3.8 → 3.3.9
