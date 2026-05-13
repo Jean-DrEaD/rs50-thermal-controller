@@ -208,7 +208,8 @@ sequenceDiagram
 ├── src/
 │   └── rs50_thermal/
 │       ├── rs50_thermal.ino     ← firmware principal
-│       └── config.h             ← pinout + thresholds
+│       ├── config.h             ← pinout + thresholds
+│       └── dashboard.h          ← HTML/CSS/JS do dashboard web
 ├── hardware/                    ← KiCad PCB
 └── .github/workflows/           ← CI (compile firmware)
 ```
