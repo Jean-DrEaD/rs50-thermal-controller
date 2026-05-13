@@ -1,357 +1,136 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   viewBox="0 0 1200 300"
-   width="100%"
-   version="1.1"
-   id="svg28"
-   sodipodi:docname="banner.svg"
-   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview28"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.48"
-     inkscape:cx="832.43243"
-     inkscape:cy="131.41892"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="g28" />
-  <defs
-     id="defs8">
-    <linearGradient
-       id="bg"
-       x1="0%"
-       y1="0%"
-       x2="100%"
-       y2="100%">
-      <stop
-         offset="0%"
-         style="stop-color:#0f0c29;stop-opacity:1"
-         id="stop1" />
-      <stop
-         offset="50%"
-         style="stop-color:#302b63;stop-opacity:1"
-         id="stop2" />
-      <stop
-         offset="100%"
-         style="stop-color:#24243e;stop-opacity:1"
-         id="stop3" />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="RS50 Thermal Controller">
+  <title>RS50 Thermal Controller — Fail-safe thermal management for RS50 wheel</title>
+
+  <defs>
+    <!-- Fundo: mesmo gradiente do dashboard -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f2027"/>
+      <stop offset="50%" stop-color="#203a43"/>
+      <stop offset="100%" stop-color="#2c5364"/>
     </linearGradient>
-    <linearGradient
-       id="heat"
-       x1="0%"
-       y1="0%"
-       x2="100%"
-       y2="0%">
-      <stop
-         offset="0%"
-         style="stop-color:#00d4ff"
-         id="stop4" />
-      <stop
-         offset="33%"
-         style="stop-color:#00ff88"
-         id="stop5" />
-      <stop
-         offset="66%"
-         style="stop-color:#ffaa00"
-         id="stop6" />
-      <stop
-         offset="100%"
-         style="stop-color:#ff0044"
-         id="stop7" />
+
+    <!-- Título: ciano vibrante do dashboard -->
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00c6ff"/>
+      <stop offset="100%" stop-color="#0072ff"/>
     </linearGradient>
-    <filter
-       id="glow"
-       x="-0.18"
-       y="-0.6"
-       width="1.36"
-       height="2.2">
-      <feGaussianBlur
-         stdDeviation="3"
-         result="coloredBlur"
-         id="feGaussianBlur7" />
-      <feMerge
-         id="feMerge8">
-        <feMergeNode
-           in="coloredBlur"
-           id="feMergeNode7" />
-        <feMergeNode
-           in="SourceGraphic"
-           id="feMergeNode8" />
+
+    <!-- Termômetro: gradiente térmico -->
+    <linearGradient id="thermal" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%"  stop-color="#4caf50"/>
+      <stop offset="40%" stop-color="#ffc107"/>
+      <stop offset="70%" stop-color="#ff9800"/>
+      <stop offset="100%" stop-color="#f44336"/>
+    </linearGradient>
+
+    <!-- Glow do bulbo -->
+    <radialGradient id="bulb" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%"  stop-color="#ff6b6b"/>
+      <stop offset="70%" stop-color="#f44336"/>
+      <stop offset="100%" stop-color="#b71c1c"/>
+    </radialGradient>
+
+    <!-- Padrão sutil de circuito -->
+    <pattern id="circuit" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M0 30 L20 30 L25 25 L35 25 L40 30 L60 30" stroke="#00c6ff" stroke-width="0.5" fill="none" opacity="0.08"/>
+      <path d="M30 0 L30 20 L25 25 M35 25 L30 30 L30 60" stroke="#00c6ff" stroke-width="0.5" fill="none" opacity="0.08"/>
+      <circle cx="30" cy="30" r="1.5" fill="#00c6ff" opacity="0.15"/>
+    </pattern>
+
+    <!-- Sombra do texto -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
-  <!-- Background -->
-  <rect
-     width="1200"
-     height="300"
-     fill="url(#bg)"
-     id="rect8" />
-  <!-- Grid pattern -->
-  <g
-     stroke="#ffffff10"
-     stroke-width="1"
-     id="g12">
-    <line
-       x1="0"
-       y1="50"
-       x2="1200"
-       y2="50"
-       id="line8" />
-    <line
-       x1="0"
-       y1="100"
-       x2="1200"
-       y2="100"
-       id="line9" />
-    <line
-       x1="0"
-       y1="150"
-       x2="1200"
-       y2="150"
-       id="line10" />
-    <line
-       x1="0"
-       y1="200"
-       x2="1200"
-       y2="200"
-       id="line11" />
-    <line
-       x1="0"
-       y1="250"
-       x2="1200"
-       y2="250"
-       id="line12" />
+
+  <!-- Fundo -->
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <rect width="1200" height="320" fill="url(#circuit)"/>
+
+  <!-- Borda interna sutil -->
+  <rect x="8" y="8" width="1184" height="304" rx="14" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+  <!-- ===== Termômetro (lado esquerdo) ===== -->
+  <g transform="translate(120, 60)">
+    <!-- Corpo do termômetro (vidro) -->
+    <rect x="-18" y="0" width="36" height="180" rx="18" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+    <!-- Coluna térmica -->
+    <rect x="-10" y="20" width="20" height="160" rx="10" fill="url(#thermal)" opacity="0.9"/>
+    <!-- Bulbo -->
+    <circle cx="0" cy="200" r="32" fill="url(#bulb)" filter="url(#glow)"/>
+    <circle cx="0" cy="200" r="32" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+
+    <!-- Marcações de temperatura -->
+    <g font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#8ab4f8" text-anchor="start">
+      <line x1="22" y1="30"  x2="32" y2="30"  stroke="#8ab4f8" stroke-width="1"/>
+      <text x="38" y="34">68°C — CRITICAL</text>
+      <line x1="22" y1="75"  x2="32" y2="75"  stroke="#8ab4f8" stroke-width="1"/>
+      <text x="38" y="79">60°C — WARNING</text>
+      <line x1="22" y1="120" x2="32" y2="120" stroke="#8ab4f8" stroke-width="1"/>
+      <text x="38" y="124">40°C — WARMING</text>
+      <line x1="22" y1="165" x2="32" y2="165" stroke="#8ab4f8" stroke-width="1"/>
+      <text x="38" y="169">&lt; 40°C — IDLE</text>
+    </g>
   </g>
-  <!-- Logo: Steering wheel -->
-  <g
-     transform="translate(120, 150)"
-     id="g19">
-    <circle
-       cx="0"
-       cy="0"
-       r="70"
-       fill="none"
-       stroke="#ff0044"
-       stroke-width="6"
-       filter="url(#glow)"
-       id="circle12" />
-    <circle
-       cx="0"
-       cy="0"
-       r="50"
-       fill="none"
-       stroke="#ff0044"
-       stroke-width="3"
-       opacity="0.6"
-       id="circle13" />
-    <circle
-       cx="0"
-       cy="0"
-       r="20"
-       fill="#ff0044"
-       filter="url(#glow)"
-       id="circle14" />
-    <line
-       x1="-70"
-       y1="0"
-       x2="-20"
-       y2="0"
-       stroke="#ff0044"
-       stroke-width="6"
-       id="line14" />
-    <line
-       x1="70"
-       y1="0"
-       x2="20"
-       y2="0"
-       stroke="#ff0044"
-       stroke-width="6"
-       id="line15" />
-    <line
-       x1="0"
-       y1="-70"
-       x2="0"
-       y2="-20"
-       stroke="#ff0044"
-       stroke-width="6"
-       id="line16" />
-    <!-- Heat waves -->
-    <path
-       d="M -90,-40 Q -100,-50 -90,-60"
-       stroke="#ffaa00"
-       stroke-width="3"
-       fill="none"
-       opacity="0.7"
-       id="path16" />
-    <path
-       d="M 90,-40 Q 100,-50 90,-60"
-       stroke="#ffaa00"
-       stroke-width="3"
-       fill="none"
-       opacity="0.7"
-       id="path17" />
-    <path
-       d="M -85,-25 Q -95,-35 -85,-45"
-       stroke="#ffaa00"
-       stroke-width="3"
-       fill="none"
-       opacity="0.5"
-       id="path18" />
-    <path
-       d="M 85,-25 Q 95,-35 85,-45"
-       stroke="#ffaa00"
-       stroke-width="3"
-       fill="none"
-       opacity="0.5"
-       id="path19" />
+
+  <!-- ===== Título e subtítulo (centro/direita) ===== -->
+  <g transform="translate(440, 0)">
+    <text x="0" y="110" font-family="'Segoe UI', Roboto, sans-serif" font-size="64" font-weight="800" fill="url(#title)" filter="url(#glow)">
+      RS50 Thermal
+    </text>
+    <text x="0" y="170" font-family="'Segoe UI', Roboto, sans-serif" font-size="38" font-weight="600" fill="#e0e0e0" opacity="0.95">
+      Controller
+    </text>
+
+    <!-- Linha separadora -->
+    <line x1="0" y1="195" x2="540" y2="195" stroke="url(#title)" stroke-width="2" opacity="0.6"/>
+
+    <!-- Tagline -->
+    <text x="0" y="222" font-family="'Segoe UI', Roboto, sans-serif" font-size="15" fill="#8ab4f8" letter-spacing="2">
+      FAIL-SAFE THERMAL MANAGEMENT FOR RS50 WHEEL
+    </text>
+
+    <!-- Badges de specs -->
+    <g transform="translate(0, 245)" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600">
+      <!-- ESP32-S3 -->
+      <g transform="translate(0, 0)">
+        <rect width="110" height="28" rx="14" fill="rgba(0,198,255,0.15)" stroke="#00c6ff" stroke-width="1"/>
+        <text x="55" y="18" fill="#00c6ff" text-anchor="middle">⚡ ESP32-S3</text>
+      </g>
+      <!-- NTC 100k -->
+      <g transform="translate(120, 0)">
+        <rect width="110" height="28" rx="14" fill="rgba(255,193,7,0.15)" stroke="#ffc107" stroke-width="1"/>
+        <text x="55" y="18" fill="#ffc107" text-anchor="middle">🌡 NTC 100k</text>
+      </g>
+      <!-- 24V Relay -->
+      <g transform="translate(240, 0)">
+        <rect width="110" height="28" rx="14" fill="rgba(244,67,54,0.15)" stroke="#f44336" stroke-width="1"/>
+        <text x="55" y="18" fill="#f44336" text-anchor="middle">🛡 24V NC Relay</text>
+      </g>
+      <!-- Fail-Safe -->
+      <g transform="translate(360, 0)">
+        <rect width="110" height="28" rx="14" fill="rgba(76,175,80,0.15)" stroke="#4caf50" stroke-width="1"/>
+        <text x="55" y="18" fill="#4caf50" text-anchor="middle">✓ Fail-Safe</text>
+      </g>
+    </g>
   </g>
-  <!-- Title -->
-  <text
-     x="280"
-     y="130"
-     font-family="Arial Black, sans-serif"
-     font-size="56"
-     font-weight="900"
-     fill="#ffffff"
-     filter="url(#glow)"
-     id="text19">
-    RS50 THERMAL
-  </text>
-  <text
-     x="280"
-     y="180"
-     font-family="Arial, sans-serif"
-     font-size="28"
-     fill="#00d4ff"
-     font-weight="bold"
-     id="text20">
-    CONTROLLER
-  </text>
-  <text
-     x="280"
-     y="220"
-     font-family="Arial, sans-serif"
-     font-size="18"
-     fill="#ffffffaa"
-     id="text21">
-    Direct Drive Wheel Protection • Open Source
-  </text>
-  <!-- Temperature gauge bars (decorative) -->
-  <g
-     transform="translate(280, 240)"
-     id="g22">
-    <rect
-       x="0"
-       y="0"
-       width="600"
-       height="12"
-       rx="6"
-       fill="#ffffff20"
-       id="rect21" />
-    <rect
-       x="0"
-       y="0"
-       width="450"
-       height="12"
-       rx="6"
-       fill="url(#heat)"
-       filter="url(#glow)"
-       id="rect22" />
-    <text
-       x="610"
-       y="10"
-       font-family="monospace"
-       font-size="14"
-       fill="#00d4ff"
-       font-weight="bold"
-       id="text22">75%</text>
+
+  <!-- ===== Versão (canto inferior direito) ===== -->
+  <g transform="translate(1100, 285)" font-family="'Segoe UI', Roboto, sans-serif">
+    <text x="0" y="0" font-size="13" font-weight="700" fill="#00c6ff" text-anchor="end">v3.3.10</text>
+    <text x="0" y="16" font-size="10" fill="#8ab4f8" text-anchor="end" opacity="0.7">github.com/Jean-DrEaD/rs50-thermal-controller</text>
   </g>
-  <!-- Stats badges -->
-  <g
-     transform="translate(950, 70)"
-     font-family="Arial, sans-serif"
-     id="g28">
-    <rect
-       x="0"
-       y="0"
-       width="180"
-       height="50"
-       rx="8"
-       fill="#ffffff15"
-       stroke="#00d4ff"
-       stroke-width="1"
-       id="rect23" />
-    <text
-       x="15"
-       y="22"
-       font-size="11"
-       fill="#ffffff80"
-       id="text23">FW VERSION</text>
-    <text
-       x="15"
-       y="42"
-       font-size="20px"
-       fill="#00d4ff"
-       font-weight="bold"
-       id="text24">v3.3.9</text>
-    <rect
-       x="0"
-       y="60"
-       width="180"
-       height="50"
-       rx="8"
-       fill="#ffffff15"
-       stroke="#ff0044"
-       stroke-width="1"
-       id="rect24" />
-    <text
-       x="15"
-       y="82"
-       font-size="11"
-       fill="#ffffff80"
-       id="text25">PROTECTION</text>
-    <text
-       x="15"
-       y="102"
-       font-size="20"
-       fill="#ff0044"
-       font-weight="bold"
-       id="text26">FAIL-SAFE</text>
-    <rect
-       x="0"
-       y="120"
-       width="180"
-       height="50"
-       rx="8"
-       fill="#ffffff15"
-       stroke="#00ff88"
-       stroke-width="1"
-       id="rect26" />
-    <text
-       x="15"
-       y="142"
-       font-size="11"
-       fill="#ffffff80"
-       id="text27">MCU</text>
-    <text
-       x="15"
-       y="162"
-       font-size="20"
-       fill="#00ff88"
-       font-weight="bold"
-       id="text28">ESP32-S3</text>
+
+  <!-- ===== Indicador de status (canto superior direito) ===== -->
+  <g transform="translate(1100, 40)">
+    <circle cx="0" cy="0" r="6" fill="#4caf50">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="-14" y="4" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#4caf50" text-anchor="end" font-weight="600">ONLINE</text>
   </g>
 </svg>
