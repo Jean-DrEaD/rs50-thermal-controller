@@ -30,6 +30,7 @@ desktop.ini
 # ─── Credenciais — NUNCA commitar! ───────────────────────────────────────────
 src/rs50_thermal/secrets.h
 src/rs50_thermal/wifi_credentials.h
+src/rs50_thermal/config.h
 
 # ─── Scripts e arquivos locais (não versionar) ───────────────────────────────
 # PowerShell (setup-repo.ps1, update-repo.ps1, etc.)
@@ -50,8 +51,3 @@ scripts/
 hardware/rs50-thermal-backups/
 hardware/*.kicad_prl
 
-config.h
-build/
-*.bin
-config.h
-src/rs50_thermal/config.h
