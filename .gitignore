@@ -54,3 +54,4 @@ config.h
 build/
 *.bin
 config.h
+src/rs50_thermal/config.h

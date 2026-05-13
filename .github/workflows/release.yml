@@ -1,123 +1,85 @@
-name: Release Build
+name: Build & Release RS50 Thermal
 
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
-  release:
-    name: Build & Publish Release
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Arduino CLI
-        uses: arduino/setup-arduino-cli@v2
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-      - name: Install ESP32 core
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install PlatformIO
         run: |
-          arduino-cli config init --overwrite
-          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
-          arduino-cli core update-index
-          arduino-cli core install esp32:esp32@2.0.14
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
 
-      - name: Install libraries
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/packages
+            ~/.platformio/platforms
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-
+
+      - name: Generate config.h from example
         run: |
-          arduino-cli lib install "FastLED@3.6.0"
-          arduino-cli lib install "WebSockets@2.4.1"
-
-      - name: Get version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
-      - name: Compile firmware
-        run: |
-          arduino-cli compile \
-            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none" \
-            --output-dir ./release \
-            ./src/rs50_thermal/
-
-      - name: List build output (debug)
-        run: |
-          echo "=== Conteudo de ./release/ ==="
-          ls -lhR ./release/
-
-      - name: Rename artifacts
-        run: |
-          set -e
-          # arduino-cli gera 3 .bin: app, bootloader, partitions
-          # O firmware principal e' o que termina em .ino.bin
-          APP_BIN=$(find ./release -name "*.ino.bin" -not -name "*.bootloader.*" -not -name "*.partitions.*" | head -1)
-          ELF=$(find ./release -name "*.ino.elf" | head -1)
-          BOOT=$(find ./release -name "*.bootloader.bin" | head -1)
-          PART=$(find ./release -name "*.partitions.bin" | head -1)
-
-          if [ -z "$APP_BIN" ]; then
-            echo "ERRO: nenhum *.ino.bin encontrado em ./release/"
-            find ./release -type f
+          if [ ! -f src/rs50_thermal/config.h.example ]; then
+            echo "ERRO: config.h.example não encontrado!"
             exit 1
           fi
+          cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
+          sed -i "s|__WIFI_SSID__|${{ secrets.WIFI_SSID }}|g" src/rs50_thermal/config.h
+          sed -i "s|__WIFI_PASS__|${{ secrets.WIFI_PASS }}|g" src/rs50_thermal/config.h
+          echo "✅ config.h gerado com sucesso"
+          echo "--- Conteúdo (sem secrets) ---"
+          grep -v "WIFI_" src/rs50_thermal/config.h || true
 
-          VER="${{ steps.version.outputs.VERSION }}"
+      - name: Build firmware
+        run: pio run
 
-          mv "$APP_BIN"  "./release/rs50_thermal_${VER}.bin"
-          [ -n "$ELF" ]  && mv "$ELF"  "./release/rs50_thermal_${VER}.elf"
-          [ -n "$BOOT" ] && cp "$BOOT" "./release/rs50_thermal_${VER}_bootloader.bin"
-          [ -n "$PART" ] && cp "$PART" "./release/rs50_thermal_${VER}_partitions.bin"
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifacts
+          cp .pio/build/*/firmware.bin artifacts/ 2>/dev/null || true
+          cp .pio/build/*/firmware.elf artifacts/ 2>/dev/null || true
+          ls -la artifacts/
 
-          echo "=== Artefatos finais ==="
-          ls -lh ./release/rs50_thermal_${VER}*
-          echo ""
-          echo "=== Tamanho do firmware principal ==="
-          stat -c "%n: %s bytes" "./release/rs50_thermal_${VER}.bin"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ github.ref_name }}
+          path: artifacts/
+          retention-days: 30
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ steps.version.outputs.VERSION }}
-          body: |
-            ## RS50 Thermal Controller ${{ steps.version.outputs.VERSION }}
-
-            ### 📦 Binários
-
-            - **`rs50_thermal_${{ steps.version.outputs.VERSION }}.bin`** — firmware principal (~756 KB)
-            - `rs50_thermal_${{ steps.version.outputs.VERSION }}_bootloader.bin` — bootloader (~14 KB)
-            - `rs50_thermal_${{ steps.version.outputs.VERSION }}_partitions.bin` — tabela de partições (~3 KB)
-            - `rs50_thermal_${{ steps.version.outputs.VERSION }}.elf` — debug symbols
-
-            ### 🔥 Como gravar no ESP32-S3-Zero
-
-            **Opção 1 — Apenas firmware (mais comum, mantém bootloader existente):**
-            ```bash
-            esptool.py --chip esp32s3 --port /dev/ttyACM0 \
-              write_flash 0x10000 rs50_thermal_${{ steps.version.outputs.VERSION }}.bin
-            ```
-
-            **Opção 2 — Flash completo (primeira gravação ou recovery):**
-            ```bash
-            esptool.py --chip esp32s3 --port /dev/ttyACM0 write_flash \
-              0x0      rs50_thermal_${{ steps.version.outputs.VERSION }}_bootloader.bin \
-              0x8000   rs50_thermal_${{ steps.version.outputs.VERSION }}_partitions.bin \
-              0x10000  rs50_thermal_${{ steps.version.outputs.VERSION }}.bin
-            ```
-
-            **Opção 3 — Web Flasher (mais fácil):**
-            Use [ESP Web Tools](https://espressif.github.io/esptool-js/) no Chrome/Edge.
-
-            ### ⚙️ Antes de gravar pelo código fonte
-            Configure `WIFI_SSID`, `WIFI_PASS` e `LED_COUNT` em `src/rs50_thermal/config.h`.
-
-            ### 📚 Documentação
-            - 📖 [README](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/README.md)
-            - 📐 [Schematic](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/docs/wiring-schematic.svg)
-            - 📜 [CHANGELOG](https://github.com/Jean-DrEaD/rs50-thermal-controller/blob/main/CHANGELOG.md)
-          files: |
-            release/rs50_thermal_*.bin
-            release/rs50_thermal_*.elf
+          files: artifacts/*
+          generate_release_notes: true
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
