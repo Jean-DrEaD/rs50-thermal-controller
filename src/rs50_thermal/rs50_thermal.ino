@@ -9,7 +9,6 @@
 #include <WebServer.h>
 #include <WebSocketsServer.h>
 #include <Wire.h>
-//#include <Adafruit_GFX.h> - Se um dia quiser implementar tela, lidar com essa biblioteca.
 #include <Adafruit_SSD1306.h>
 #include <math.h>
 
