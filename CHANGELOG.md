@@ -3,6 +3,27 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.12] - 2026-05-13
+
+### Added
+- OTA support (`ArduinoOTA`) with visual fail-safe on WS2812 strip
+  (magenta = start, white = done, red = error).
+- Boot banner with firmware version, build date/time and chip ID.
+- `fw` field included in WebSocket and `/status` JSON payloads.
+
+### Changed
+- Relay logic consolidated: active HIGH on GPIO4, engaged **only** in
+  `CRITICAL` state (fail-safe forced LOW during OTA).
+- LED strip now reflects FSM state in real time (blue/green/yellow/red).
+- `FW_VERSION` bumped from `3.3.11` → `3.3.12`.
+
+### Fixed
+- Duplicate `setupLEDs()` call removed from `setup()`.
+- PWM initial write now starts at 0 instead of `PWM_MIN` to avoid
+  fan kick on cold boot.
+- FSM hysteresis applied consistently across all transitions.
+
+
 ## [3.3.11] — 2026-05-13
 
 ### Added

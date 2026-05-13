@@ -199,19 +199,28 @@ sequenceDiagram
    - Shutdown: ~3,3V.
    - Relé deve clicar audivelmente.
 
-## 🗂 Estrutura do repositório
+## 📂 Estrutura do repositório
 
-```
+​```
 .
+├── README.md                  ← visão geral + diagramas Mermaid + banner
+├── CHANGELOG.md               ← histórico (Keep a Changelog)
+├── CONTEXT.md                 ← este arquivo
 ├── docs/
-│   └── wiring-schematic.svg     ← export Fritzing
+│   ├── banner.svg             ← banner do projeto (usado no README)
+│   └── wiring-schematic.svg
 ├── src/
 │   └── rs50_thermal/
-│       ├── rs50_thermal.ino     ← firmware principal
-│       ├── config.h             ← pinout + thresholds
-│       └── dashboard.h          ← HTML/CSS/JS do dashboard web
-├── hardware/                    ← KiCad PCB
-└── .github/workflows/           ← CI (compile firmware)
+│       ├── rs50_thermal.ino   ← firmware principal
+│       ├── config.h           ← FW_VERSION + macros (NÃO COMMITAR)
+│       ├── config.h.example   ← template público
+│       └── dashboard.h        ← HTML/CSS/JS do dashboard web
+├── tools/
+│   ├── flash_ota.sh           ← OTA upload (Linux/macOS/WSL)
+│   └── flash_ota.ps1          ← OTA upload (Windows/PowerShell)
+├── hardware/                  ← KiCad PCB (sem planos ativos no v3.x)
+└── .github/
+    └── workflows/             ← CI (Arduino Build & Validate + Release Build)
 
 ```
 
