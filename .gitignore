@@ -1,46 +1,51 @@
-# Arduino build output
+# ─── Arduino build output ────────────────────────────────────────────────────
 build/
-*.bin
 *.elf
 *.hex
 *.map
+# .bin ignorado globalmente — artefatos de release ficam só no GitHub Releases
+*.bin
 
-# IDE files
+# ─── IDE ─────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS files
+# ─── OS ──────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Logs
+# ─── Logs ────────────────────────────────────────────────────────────────────
 *.log
 
-# Backup files
+# ─── Backups e temporários ───────────────────────────────────────────────────
 *.bak
 *.tmp
 *~
+* - Copy.*
+*.ino.txt
 
-# Sensitive config (NUNCA commitar credenciais reais!)
+# ─── Credenciais — NUNCA commitar! ───────────────────────────────────────────
 src/rs50_thermal/secrets.h
 src/rs50_thermal/wifi_credentials.h
 
-# Local backups
-.backup/
-
-# Scripts locais (não versionar)
+# ─── Scripts e arquivos locais (não versionar) ───────────────────────────────
+# PowerShell (setup-repo.ps1, update-repo.ps1, etc.)
 *.ps1
-*.txt
+# Arquivos de mensagem de commit temporários (git commit -F)
+commit_msg*.txt
+tag_msg*.txt
+scratch*.txt
 
-# KiCad backups e arquivos locais
+# ─── Pastas locais de trabalho ───────────────────────────────────────────────
+.backup/
+# Pasta ci/ — bibliotecas do CI agora inlineadas diretamente nos workflows
+ci/
+# Scripts auxiliares locais
+scripts/
+
+# ─── KiCad ───────────────────────────────────────────────────────────────────
 hardware/rs50-thermal-backups/
 hardware/*.kicad_prl
-
-# Copias e backups
-*.ino.txt
-* - Copy.*
-*.bak
-*.tmp
