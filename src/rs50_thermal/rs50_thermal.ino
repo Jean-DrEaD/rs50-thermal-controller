@@ -213,7 +213,6 @@ void loop() {
     relayOn = (state == CRITICAL);
     digitalWrite(PIN_RELAY, relayOn ? HIGH : LOW);
 
-    updateDisplay();
   }
 
   // Telemetria periódica

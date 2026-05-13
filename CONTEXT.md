@@ -183,3 +183,73 @@ Implementar **somente depois** que tudo acima estiver validado em bancada:
 - Provavelmente CAN: ESP32-S3 tem TWAI nativo, MCP2551 como transceiver
 - Ler temperatura/erro/status do ODESC FFBeast
 - Expor no dashboard web e/ou enviar via Wi-Fi/BLE
+
+
+
+
+# Contexto — Hotfix v3.3.9
+
+## Resumo
+Correção emergencial de falha de build no CI da release **v3.3.9** do projeto
+**rs50_thermal**, causada por um include órfão da biblioteca `Adafruit_GFX.h`.
+
+## Linha do tempo
+1. Release `v3.3.9` foi tagueada com um commit que continha a linha
+   `//#include <Adafruit_GFX.h>` em `src/rs50_thermal/rs50_thermal.ino`.
+2. O CI falhou ao tentar resolver a dependência inexistente no projeto.
+3. A tag `v3.3.9` foi apagada (local e remota) para permitir correção limpa.
+4. Branch `hotfix/v3.3.9-missing-include` criada a partir da `main`.
+5. Linha removida, commit assinado e PR aberto.
+6. Após CI verde, merge na `main` e recriação da tag `v3.3.9`.
+
+## Arquivo afetado
+- `src/rs50_thermal/rs50_thermal.ino` (linha 12 removida)
+
+## Decisão técnica
+O projeto **não utiliza display gráfico** e não há roadmap previsto para
+integração com `Adafruit_GFX`. Manter o include — mesmo comentado — é
+desnecessário e fonte de ruído no pipeline. Decisão: **remover por completo**.
+
+## Comandos relevantes
+
+### Apagar tag incorreta
+\`\`\`bash
+git tag -d v3.3.9
+git push origin :refs/tags/v3.3.9
+\`\`\`
+
+### Criar branch de hotfix
+\`\`\`bash
+git checkout main
+git pull
+git checkout -b hotfix/v3.3.9-missing-include
+\`\`\`
+
+### Commit do fix
+\`\`\`bash
+git commit -m "fix(build): remove orphan Adafruit_GFX include breaking CI"
+\`\`\`
+
+### Recriar a tag após merge
+\`\`\`bash
+git checkout main
+git pull
+git tag -a v3.3.9 -m "Release v3.3.9 — hotfix orphan include"
+git push origin v3.3.9
+\`\`\`
+
+### Verificação final
+\`\`\`powershell
+gci src -Recurse -Include *.ino,*.h,*.cpp | sls "Adafruit_GFX"
+# Saída esperada: vazia
+\`\`\`
+
+## Impacto
+- ✅ Build do CI restaurado
+- ✅ Release `v3.3.9` consistente
+- ✅ Codebase mais limpo, sem dependências fantasmas
+
+## Lições aprendidas
+- Comentar includes não os torna inertes em toda toolchain — **remover é mais seguro**.
+- Antes de tagar uma release, rodar o CI localmente em modo "release" reduz retrabalho.
+- Sempre validar tags com `git show <tag>` antes do push final.
