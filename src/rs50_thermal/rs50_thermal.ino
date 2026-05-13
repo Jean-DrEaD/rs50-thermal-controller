@@ -8,7 +8,6 @@
 #include <WiFiUdp.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
-#include <Wire.h>
 #include <math.h>
 
 #include "config.h"
@@ -54,7 +53,7 @@ float readNTC() {
   float adc = acc / (float)samples;
   if (adc <= 0) adc = 1;
 
-  // Divisor: NTC -> GND, R_SERIES -> 3V3
+  // Divisor: NTC -> GND, NTC_SERIES_R -> 3V3
   float r = NTC_SERIES_R * (adc / (ADC_MAX - adc));
   float lnR = logf(r / NTC_NOMINAL_R);
   float invT = (1.0f / NTC_NOMINAL_T) + (lnR / NTC_BETA);
@@ -175,8 +174,7 @@ void setup() {
   digitalWrite(PIN_RELAY, LOW);
   analogReadResolution(12);
 
-  Wire.begin(PIN_SDA, PIN_SCL);
-  
+
   setupPWM();
   setupWiFi();
 
