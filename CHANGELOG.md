@@ -3,6 +3,38 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.10] - 2026-05-13
+
+### Added
+- Macro `LED_COUNT` (5) em `config.h` — antes mencionada no README mas ausente
+- Macro `PIN_WS2812` (GPIO 9) e `LED_BRIGHTNESS` (64)
+- Macro `TEMP_RESTART` (63°C) para histerese pós-shutdown explícita
+- Lições aprendidas #8, #9 e #10 no `CONTEXT.md`
+
+### Changed
+- **Pinout migrado para ESP32-S3-Zero** (estava com pinos do ESP32 clássico):
+  - `PIN_NTC`: 34 → 1
+  - `PIN_RELAY`: 26 → 4
+  - `PIN_PWM`: 25 → 5
+- **NTC**: 10k → 100k B3950 (alinhado ao sensor real no estator)
+- **Thresholds térmicos** alinhados ao `CONTEXT.md`:
+  - `TEMP_IDLE`: 30 → 40°C
+  - `TEMP_WARNING`: 65 → 60°C
+  - `TEMP_CRITICAL`: 80 → 68°C
+  - `THERMAL_HYSTERESIS`: 2.0 → 5.0°C
+- `PWM_MIN`: 20 → 0 (fan desliga em repouso, menos sujeira)
+- Comentário do pinout do relé esclarecido (HIGH = aciona MOSFET = abre NC)
+
+### Removed
+- `#define UDP_PORT 33339` duplicado no `.ino` (já vinha do `config.h` como 33333)
+- `#include <Wire.h>`, `Wire.begin()`, `PIN_SDA`, `PIN_SCL` (I2C não usado em v3.x)
+- Função `stateName(int)` inline em `config.h` (dead code — `.ino` tem versão com `ThermalState`)
+- Placeholder `<owner>` no header do `.ino` (corrigido para `Jean-DrEaD`)
+
+### Fixed
+- Comentário `R_SERIES -> 3V3` corrigido para `NTC_SERIES_R -> 3V3` (nome real da macro)
+- Trailing whitespace no `.ino`
+
 ## [3.3.9] — 2026-05-12
 
 ### Fixed
@@ -268,3 +300,4 @@ como fonte da verdade — apenas referência de breadboard).
 ## [3.1.0] — 2026-05-01
 
 - Primeiro protótipo com ESP32-S3-Zero + NTC + cooler.
+
