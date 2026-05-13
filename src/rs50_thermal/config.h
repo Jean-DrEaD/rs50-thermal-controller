@@ -26,8 +26,8 @@
 #define PIN_NTC           34         // ADC1_CH6 (entrada analógica)
 #define PIN_PWM           25         // Saída PWM para cooler/fan
 #define PIN_RELAY         26         // Saída digital relé (NC fail-safe)
-#define PIN_SDA           21         // I2C OLED
-#define PIN_SCL           22         // I2C OLED
+#define PIN_SDA           21         // I2C bus
+#define PIN_SCL           22         // I2C bus
 
 // ---------- PWM ----------
 #define PWM_CHANNEL_FAN   0

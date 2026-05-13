@@ -9,7 +9,6 @@
 #include <WebServer.h>
 #include <WebSocketsServer.h>
 #include <Wire.h>
-#include <Adafruit_SSD1306.h>
 #include <math.h>
 
 #include "config.h"
@@ -18,9 +17,6 @@
 // Broadcast da sua rede local (ajuste conforme sua sub-rede)
 IPAddress UDP_BROADCAST_IP(255, 255, 255, 255);
 #define UDP_PORT 33339   // ou a porta que você usa
-
-// ---------- Display ----------
-Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 // ---------- Rede ----------
 WiFiUDP udp;
@@ -111,20 +107,6 @@ void applyDuty(uint8_t duty) {
   ledcWrite(PWM_CHANNEL_FAN, raw);
 }
 
-// ---------- Display ----------
-void updateDisplay() {
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.printf("Temp:  %.2f C\n", filteredTemp);
-  display.printf("Duty:  %u %%\n", currentDuty);
-  display.printf("State: %s\n", stateName(state));
-  display.printf("Relay: %s\n", relayOn ? "ON" : "OFF");
-  display.printf("IP:    %s", WiFi.localIP().toString().c_str());
-  display.display();
-}
-
 // ---------- Telemetria ----------
 void sendTelemetry() {
   // JSON via WebSocket
@@ -194,11 +176,7 @@ void setup() {
   analogReadResolution(12);
 
   Wire.begin(PIN_SDA, PIN_SCL);
-  if (display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    display.clearDisplay();
-    display.display();
-  }
-
+  
   setupPWM();
   setupWiFi();
 
