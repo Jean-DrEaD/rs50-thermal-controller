@@ -8,7 +8,7 @@
 // ---------- Firmware Version ----------
 // IMPORTANTE: manter no formato "3.3.X" — validado pelo hook .githooks/pre-commit
 // e pela linha 2 de rs50_thermal.ino (// RS50 Thermal Controller vX.Y.Z)
-#define FW_VERSION        "3.3.10"
+#define FW_VERSION        "3.3.11"
 
 // ---------- Wi-Fi ----------
 #define WIFI_SSID         "SEU_SSID_AQUI"
