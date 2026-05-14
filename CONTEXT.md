@@ -1,236 +1,97 @@
-# RS50 Thermal Controller — Context
+# RS50 Thermal Controller — Contexto de Sessão
 
-> Documento curto para retomar o projeto rapidamente.
-> Última atualização: 2026-05-13 (v3.3.12).
+> **Versão atual:** 3.3.13  
+> **Última atualização:** 2026-05-14  
+> Documento dinâmico — registra o **estado atual de trabalho**, decisões em aberto e próximos passos.  
+> Para visão estável do projeto, ver [`PROJECT.md`](./PROJECT.md).
 
-## 🎯 Objetivo
+---
 
-Controle térmico **fail-safe** para volante RS50 com motor BLDC de
-hoverboard (15Nm) + MKS XDrive Mini (firmware ODESC FFBeast). Corta o
-+24V da MKS quando NTC ≥ 68°C.
+## 🎯 Foco da sessão atual
 
-## 📍 Status atual
+- Consolidar documentação (`README.md`, `PROJECT.md`, `CONTEXT.md`, `CHANGELOG.md`) para v3.3.13
+- Validar fluxo de **bump automático do banner SVG** via workflow (`banner-bump.yml`)
+- Garantir que o **OTA fail-safe** (fan=0 + relay=LOW + LED magenta) esteja estável
+- Preparar terreno para **validação em hardware real** por etapas
 
-- **Software**: ✅ v3.3.12 publicada — OTA + FSM LEDs + boot banner
-- **Config**: ✅ pinout, thresholds e macros sincronizados com hardware real
-- **CI/Build**: ✅ core ESP32 fixado em `2.0.14`, FQBN validado com `PSRAM=disabled`
-- **Hardware**: 🔧 bring-up parcial — upload via procedimento manual GPIO0+RESET validado
-- **Próximo passo**: validar boot limpo + serial CDC → seguir checklist de bring-up
+---
 
-## 🧩 Hardware fechado
+## ✅ Checklist de validação por etapas
 
-- **MCU**: ESP32-S3-Zero (Waveshare)
-- **Sensor**: NTC 100k B3950 (vidro) no estator
-- **Atuador**: Relé Songle SLA-24VDC-SL-C (NC, SPDT 30A)
-- **Driver**: IRLZ44N + 220Ω no gate + pull-down 10k + flyback 1N4007
-- **Reguladores**: 2× HW-411 (LM2596): 24→12V e 12→5V
-- **Cooler**: Fan 120mm 12V 4-pin PWM nativo (PWM 3.3V direto do GPIO)
-- **Status**: WS2812 (5 LEDs) com 330Ω série
+| Etapa | Item                                  | Status     | Notas                                  |
+|-------|---------------------------------------|------------|----------------------------------------|
+| 1     | Boot do ESP32-S3 + Serial             | ✅ OK      | 115200 baud, logs limpos               |
+| 2     | Leitura NTC (ADC GPIO1)               | ✅ OK      | Divisor 100k + 100nF, curva B3950      |
+| 3     | PWM Fan 25kHz (GPIO5)                 | ✅ OK      | `ledcSetup` + `ledcAttachPin`          |
+| 4     | WS2812 5 LEDs (GPIO9)                 | ✅ OK      | FastLED 3.6.0, 330Ω série              |
+| 5     | Relé via MOSFET (GPIO4)               | 🟡 Parcial | Bench OK, falta teste com motor real   |
+| 6     | FSM Temperatura completa              | ✅ OK      | Histerese 5°C em CRITICAL        |
+| 7     | WiFi STA + dashboard HTTP/WS          | ✅ OK      | porta 80/81                            |
+| 8     | UDP broadcast SimHub (33333)          | ✅ OK      | JSON validado                          |
+| 9     | OTA `rs50-thermal.local:3232`         | ✅ OK      | fail-safe ativo no `onStart()`         |
+| 10    | Teste com motor 24V real              | ⏳ Pendente | Próxima etapa crítica                  |
 
-## 🔌 Pinout ESP32-S3-Zero
+---
 
-| GPIO | Função      | Macro         | Notas                              |
-|------|-------------|---------------|------------------------------------|
-| 1    | NTC ADC     | `PIN_NTC`     | divisor 100k + cap 100nF           |
-| 4    | Gate MOSFET | `PIN_RELAY`   | 220Ω + pull-down 10k, ativo HIGH   |
-| 5    | PWM Fan     | `PIN_PWM`     | 25kHz, 3.3V direto                 |
-| 9    | WS2812 Data | `PIN_WS2812`  | 330Ω série, `LED_COUNT=5`          |
-| 21   | ⚠️ NÃO USAR | —             | LED RGB onboard                    |
+## 📂 Arquivos em foco (linhas atuais)
 
-> ⚠️ I2C **não é usado** em v3.x. `Wire.h`, `PIN_SDA`, `PIN_SCL` foram
-> removidos em v3.3.10.
+| Arquivo                          | Estado    | Última alteração relevante               |
+|----------------------------------|-----------|------------------------------------------|
+| `src/rs50_thermal/rs50_thermal.ino` | ✅ Estável | OTA fail-safe + FSM completa             |
+| `src/rs50_thermal/config.h`         | ✅ Estável | `FW_VERSION "3.3.13"`                    |
+| `src/rs50_thermal/config.h.example` | ✅ Estável | Modelo sem credenciais                   |
+| `src/rs50_thermal/dashboard.h`      | ✅ Estável | Raw string `R"RS50DASH338(...)"`         |
+| `.github/workflows/build.yml`       | ✅ Estável | Core esp32 fixado em 2.0.14              |
+| `.github/workflows/banner-bump.yml` | 🟡 Em ajuste | Validar query string `?v=X.Y.Z`        |
+| `README.md`                          | ✅ Atualizado | Banner + diagramas mermaid             |
+| `PROJECT.md`                         | ✅ Atualizado | Reescrito para v3.3.13                 |
+| `CHANGELOG.md`                       | ✅ Atualizado | Entrada v3.3.13 consolidada            |
 
-## 🛡 Topologia fail-safe
+---
 
-- +24V → COM do relé → NC (fechado em repouso) → MKS VIN+
-- GND vai **direto** da fonte pra MKS (não passa pelo relé)
-- ESP travar / faltar 5V → relé volta a NC fechado → motor continua OK
-- Shutdown: GPIO4=HIGH → MOSFET ON → bobina energiza → NC abre → motor para
-- **Durante OTA**: fan=0 e relay=LOW forçados (fail-safe visual magenta)
+## 🧠 Decisões recentes
 
-## 🌡 Thresholds de temperatura
+- **I2C removido permanentemente** desde v3.3.10 (`Wire.h`, `PIN_SDA`, `PIN_SCL` excluídos)
+- **Core esp32 fixado em 2.0.14** — não migrar para 3.x sem refator de `ledc*` API
+- **Delimitador raw string** limitado a 16 chars → padrão adotado: `RS50DASH<versão_curta>`
+- **Branch `main` protegida** — só merge via PR com CI verde
+- **Banner SVG** versionado via query string para invalidar cache do GitHub
 
-| Faixa             | Estado       | Ação                          | Macro            |
-|-------------------|--------------|-------------------------------|------------------|
-| < 40°C            | IDLE         | Fan OFF, LED azul             | `TEMP_IDLE`      |
-| 40–60°C           | WARMING      | PWM proporcional, LED verde   | `TEMP_WARMING`   |
-| 60–68°C           | WARNING      | PWM 100%, LED amarelo         | `TEMP_WARNING`   |
-| ≥ 68°C            | **CRITICAL** | Motor cortado, LED vermelho   | `TEMP_CRITICAL`  |
-| < 63°C (pós-CRIT) | Religa       | Histerese de 5°C              | `TEMP_RESTART`   |
+---
 
-- `PWM_MIN = 0` (fan desliga em repouso)
-- `THERMAL_HYSTERESIS = 2.0f` (geral); 5°C grande só em CRITICAL→WARNING
+## ⚠️ Pontos de atenção
 
-## 🌐 Rede
+- `arduino-cli` no CI **não pode** usar `core esp32:esp32@latest` — sempre `@2.0.14`
+- HTML/JS grandes devem ficar em arquivo `.h` separado, **nunca inline no `.ino`**
+- Ao criar nova tag, lembrar de rodar `git ls-remote` com `refs/tags/vX.Y.Z^{}` para resolver commit real
+- Durante OTA, **forçar** `fan=0` e `relay=LOW` no `onStart()` — falha aqui = motor sem corte
 
-- **WiFi STA**  — credenciais em `config.h` (use `config.h.example`)
-- **HTTP :80**  — dashboard + `/status` (JSON com `fw`)
-- **WS :81**   — telemetria JSON em tempo real
-- **UDP 33333** — CSV broadcast para SimHub
-- **OTA**       — `rs50-thermal.local:3232` (ArduinoOTA)
-  - Upload: `tools/flash_ota.ps1` ou `tools/flash_ota.sh`
-  - Visual: magenta=start, white=done, red=error
+---
 
-## 🛠 Stack de software
+## 🚧 Tarefas em aberto
+- [ ] Testar `banner-bump.yml` em tag de teste (`v3.3.13-rc1`)
+- [ ] Validar relé + motor real (24V) em bancada
+- [ ] Documentar curva NTC B3950 com tabela de calibração em `docs/`
+- [ ] Criar script `tools/ota_flash.sh` parametrizado por versão
+- [ ] Avaliar inclusão de watchdog hardware (TPL5010) em revisão futura
 
-- **Arduino IDE 2.x** + `arduino-cli` no CI (GitHub Actions)
-- **ESP32 Arduino Core**: `2.0.14` (fixado nos workflows)
-- **FastLED**: 3.6.x (WS2812) — versão fixada inline nos workflows
-- **PWM**: API `ledcSetup` + `ledcAttachPin` (core 2.x)
-  ⚠️ NÃO usar `ledcAttach` (essa é da core 3.x)
-- **OTA**: `ArduinoOTA` (nativo do core esp32)
-- **Dashboard Web**: HTML/CSS/JS embutido em `dashboard.h` (raw literal C++)
-- **Telemetria**: WebSocket (porta 81) + UDP broadcast (porta 33333 para SimHub)
+---
 
+## 🔁 Comandos úteis da sessão
 
-## 📂 Estrutura
+```bash
+# Build local
+arduino-cli compile --fqbn esp32:esp32:esp32s3 src/rs50_thermal
 
-```
-.
-├── README.md ← visão geral + diagramas Mermaid + banner 
-├── CHANGELOG.md ← histórico (Keep a Changelog) 
-├── CONTEXT.md ← este arquivo 
-├── docs/ 
-│    ├── banner.svg ← banner do projeto (usado no README) 
-│    └── wiring-schematic.svg ← export Fritzing breadboard 
-├── src/ 
-│    └── rs50_thermal/ 
-│        ├── rs50_thermal.ino ← firmware principal 
-│        ├── config.h ← FW_VERSION + macros 
-│        └── dashboard.h ← HTML/CSS/JS do dashboard web 
-├── hardware/ ← KiCad PCB (sem planos ativos no v3.x) 
-└── .github/ 
-     └── workflows/ ← CI (Arduino Build & Validate + Release Build)
+# Upload via OTA
+python tools/espota.py -i rs50-thermal.local -p 3232 -f build/rs50_thermal.ino.bin
 
-```
+# Resolver commit de uma tag anotada
+git ls-remote origin "refs/tags/v3.3.13^{}"
 
+# Criar tag e push
+git tag -a v3.3.13 -m "Release v3.3.13"
+git push origin v3.3.13
 
-## 🎓 Lições aprendidas (gotchas do build)
-
-### 1. Raw string delimiter tem limite de 16 caracteres
-C++ standard: o delimitador entre `R"` e `(` aceita **no máximo 16 chars**.
-- ✅ `R"RS50DASH338(...)RS50DASH338"` (11 chars)
-- ❌ `R"DASHBOARD_RS50_V338(...)DASHBOARD_RS50_V338"` (19 chars)
-
-### 2. HTML/JS embutido: separar em `.h` próprio
-Manter HTML grande dentro do `.ino` confunde o parser do `arduino-cli` quando há
-template literals JS (`${...}`).
-- Separar HTML em `dashboard.h`
-- Evitar template literals — usar concatenação `+`
-- Evitar arrow functions complexas — preferir `function() {...}`
-- Delimitador raw literal único e curto (≤16 chars)
-
-### 3. Branch `main` é protegida — só via PR
-- "Require approvals" desabilitado (single-maintainer repo)
-- "Require status checks" mantido (CI tem que passar)
-- Fluxo: `git checkout -b hotfix/X` → push → PR → CI verde → merge
-
-### 4. PowerShell + git commit: usar `-F arquivo.txt`
-Mensagens multi-linha com `git commit -m` sofrem com escape de aspas e
-caracteres especiais no PowerShell. Sempre escrever em arquivo temporário.
-
-### 5. `git ls-remote` em tags anotadas retorna o objeto da tag
-Pra resolver até o commit: `git ls-remote origin "refs/tags/v3.3.8^{}"`
-
-### 6. Fixar versão do core ESP32 no CI
-`arduino-cli core install esp32:esp32@2.0.14` — nunca usar `latest`.
-Mesma regra vale pras libs.
-
-### 7. Includes comentados ainda quebram o CI
-O arduino-cli resolve dependências **antes** do pré-processador. Um
-`// #include <Adafruit_GFX.h>` comentado pode causar falha de build.
-**Regra**: se não usa, deleta a linha.
-
-### 8. Macros redefinidas em `.ino` × `config.h`
-Single source of truth: **sempre no `config.h`**. Nunca redefinir no `.ino`.
-
-### 9. README pode prometer macros que o código não tem
-Sempre que mexer no README mencionando configuração, fazer grep no `config.h`.
-
-### 10. Pinout do `config.h` precisa bater com o MCU real
-Pinos diferem entre famílias ESP32 — sempre validar contra datasheet.
-
-### 11. `FlashFreq` não é parâmetro válido do FQBN para `esp32s3`
-Validar opções com `arduino-cli board details -b esp32:esp32:esp32s3`.
-
-### 12. USB-CDC nativo + auto-reset é frágil no S3-Zero
-Com `USBMode=hwcdc` + `CDCOnBoot=cdc`, o handshake DTR/RTS falha em ~30%
-das tentativas. Sempre ter fallback manual (GPIO0 + RESET) documentado.
-Preferir Tera Term/PuTTY ao `arduino-cli monitor` pra debug serial pós-flash.
-
-### 13. OTA precisa de fail-safe explícito (v3.3.12)
-Durante `ArduinoOTA.onStart()`, **forçar** fan=0 e relay=LOW antes do flash.
-Sem isso, o motor pode ficar acionado se o ESP travar no meio do update.
-Feedback visual no WS2812 (magenta/white/red) ajuda no debug em campo.
-
-## 🔄 Fluxo de release validado
-
-1. Bump `FW_VERSION` em `src/rs50_thermal/config.h`
-2. Atualizar header do `.ino` (linha 2 — validado pelo pre-commit hook)
-3. Atualizar `CHANGELOG.md`
-4. Commit em branch `hotfix/X` ou `feat/X` (nunca direto na main)
-5. Push da branch → abrir PR (`gh pr create --fill --base main`)
-6. Aguardar CI verde (Arduino Build & Validate)
-7. Merge na main via squash (`gh pr merge N --squash --delete-branch`)
-8. `git pull` + criar `tag_msg.txt` + `git tag -a vX.Y.Z -F tag_msg.txt`
-9. `git push origin vX.Y.Z`
-10. Workflow Release Build dispara automaticamente
-
-> 💡 Recriar tag após hotfix: `git tag -d vX.Y.Z` + `git push origin :refs/tags/vX.Y.Z`,
-> corrigir, merge, então `git tag -a vX.Y.Z -F tag_msg.txt && git push origin vX.Y.Z`.
-
-## 📡 Configuração de build validada
-
-```powershell
-$fqbn = "esp32:esp32:esp32s3:" + `
-        "USBMode=hwcdc," + `
-        "CDCOnBoot=cdc," + `
-        "FlashMode=qio," + `
-        "FlashSize=4M," + `
-        "PartitionScheme=default," + `
-        "PSRAM=disabled"
-```
-
-## ❌ Fora de escopo (v3.x)
-
-- Comunicação com a MKS XDrive Mini
-  * ⚠️ A placa **não suporta UART** — apenas **CAN** ou **SPI**
-  * Telemetria bidirecional planejada apenas após bring-up completo
-- Telemetria via Wi-Fi/BLE (planejado v4.x — após hardware testado)
-- Migração para PCB (KiCad em `hardware/` existe mas **sem planos ativos**)
-- Carcaça/case
-
-
-## 🚧 Próximas etapas (hardware bring-up)
-
-Ordem sugerida pra debug incremental — só avança se a anterior passar:
-
-- [ ] **1. Reguladores isolados**: mede 12V e 5V com multímetro (sem carga)
-- [ ] **2. + ESP32-S3**: confirma boot, USB serial responde
-- [ ] **3. + NTC**: valida ADC contra termômetro de referência
-- [ ] **4. + Fan PWM**: testa 3 faixas (off / ramp / max)
-- [ ] **5. + WS2812**: confirma cores em cada estado (`LED_COUNT=5`)
-- [ ] **6. + Relé com carga fake** (LED+resistor): valida shutdown
-- [ ] **7. + MKS + motor real**: teste fail-safe completo
-- [ ] **8. Calibração da curva NTC**: banho quente + termômetro padrão
-- [ ] **9. Validar histerese**: aquece >68°C, espera religar em <63°C
-- [ ] **10. Dashboard web**: Wi-Fi STA mode, leitura em tempo real
-- [ ] **11. OTA em produção**: validar tools/flash_ota.ps1 com firmware real
-
-## 🐛 O que foi corrigido no v3.3.12
-
-**1. OTA com fail-safe visual** — fan/relay zerados durante flash, feedback RGB.
-**2. Boot banner** — versão, build date e Chip ID no boot serial.
-**3. Firmware no payload** — telemetria WS e /status agora carregam a versão.
-**4. LED strip mirrors FSM** — cores em tempo real (azul/verde/amarelo/vermelho).
-**5. PWM inicia em 0** — evita "kick" do fan no cold boot.
-
-
-### 📡 Telemetria Completa (apenas após bring-up completo)
-
-Implementar **somente depois** que tudo acima estiver validado em bancada:
-
-- Decidir entre CAN (preferido — protocolo nativo da MKS) ou SPI
-- Provavelmente CAN: ESP32-S3 tem TWAI nativo, MCP2551 como transceiver
-- Ler temperatura/erro/status do ODESC FFBeast
-- Expor tudo no dashboard web e/ou enviar via Wi-Fi/BLE
+# Forçar refresh do banner (cache GitHub)
+# Atualizar README.md: ![banner](docs/banner.svg?v=3.3.13)

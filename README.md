@@ -23,7 +23,7 @@ de hoverboard (15Nm) acionado por placa MKS XDrive Mini 1.0
 > o motor continua funcionando. O corte só acontece quando o sistema
 > conscientemente decide cortar.
 
-![Wiring Schematic](docs/wiring-schematic.svg)
+![Wiring Schematic](docs/wiring-schematic.svg?v=3.3.13)
 > 📐 Diagrama de breadboard exportado do Fritzing — mostra o layout físico real da montagem.
 > Para o detalhamento lógico do circuito, ver os diagramas Mermaid abaixo.
 
@@ -111,8 +111,8 @@ stateDiagram-v2
     FanMax --> FanRamp: T < 60°C
     Shutdown --> FanMax: T < 63°C (histerese)
 
-    Repouso: Repouso\nGPIO4=LOW · Fan OFF\nLED verde
-    FanRamp: Fan Ramp\nGPIO4=LOW · PWM proporcional\nLED azul
+    Repouso: Repouso\nGPIO4=LOW · Fan OFF\nLED azul
+    FanRamp: Fan Ramp\nGPIO4=LOW · PWM proporcional\nLED verde
     FanMax: Fan Máximo\nGPIO4=LOW · PWM 100%\nLED amarelo
     Shutdown: Shutdown Térmico\nGPIO4=HIGH · Motor cortado\nLED vermelho piscando
 ```
@@ -201,11 +201,11 @@ sequenceDiagram
 
 ## 📂 Estrutura do repositório
 
-​```
+```
 .
 ├── README.md                  ← visão geral + diagramas Mermaid + banner
 ├── CHANGELOG.md               ← histórico (Keep a Changelog)
-├── CONTEXT.md                 ← este arquivo
+├── CONTEXT.md                 ← diário de sessão
 ├── docs/
 │   ├── banner.svg             ← banner do projeto (usado no README)
 │   └── wiring-schematic.svg
