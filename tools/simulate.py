@@ -13,10 +13,13 @@ def load_dashboard_html() -> str:
     if not DASHBOARD_H.exists():
         return f"<h1>dashboard.h não encontrado em {DASHBOARD_H}</h1>"
     raw = DASHBOARD_H.read_text(encoding='utf-8')
-    match = re.search(r'R"rawliteral\((.*?)\)rawliteral"', raw, re.DOTALL)
-    if not match:
-        return "<h1>HTML não encontrado dentro de dashboard.h</h1>"
-    return match.group(1)
+    match = re.search(
+    r'R"([A-Za-z0-9_]{0,16})\((.*?)\)\1"',
+    raw, re.DOTALL
+)
+if not match:
+    return "<h1>HTML não encontrado dentro de dashboard.h</h1>"
+return match.group(2)
 
 class DashboardHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):

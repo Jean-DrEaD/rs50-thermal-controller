@@ -2,9 +2,9 @@
  * ============================================================================
  *  RS50 Thermal Controller
  *  Firmware: rs50_thermal.ino
- *  Version : 3.3.12
- *  Target  : ESP32 (Joinville/BR)
- *  Author  : Delano
+ *  Version : 3.3.13
+ *  Target  : ESP32-S3-Zero
+ *  Author  : DrEaD
  * ----------------------------------------------------------------------------
  *  Features:
  *   - NTC reading w/ Steinhart-Hart + EMA filter
@@ -30,7 +30,7 @@
 #include "config.h"
 #include "dashboard.h"
 
-#define FW_VERSION "3.3.12"
+#define FW_VERSION "3.3.13"
 
 // ---------------------------------------------------------------------------
 // Globals

@@ -6,122 +6,141 @@ on:
       - 'v*.*.*'
 
 env:
-  ESP32_CORE_VERSION: "2.0.14"
-  FQBN: "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none"
+  FQBN: esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled
+  SKETCH_DIR: src/rs50_thermal
+  CORE_VERSION: 2.0.14
 
 jobs:
-  build-release:
+  release:
+    name: Build & publish release artifacts
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Validate tag matches FW_VERSION in config.h
+      - name: Extract tag version
+        id: tag
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
-          echo "Tag version: $TAG_VERSION"
-          if [ -f src/rs50_thermal/config.h ]; then
-            CFG_SRC="src/rs50_thermal/config.h"
-          else
-            CFG_SRC="src/rs50_thermal/config.h.example"
-          fi
-          FW_VERSION=$(grep -oP 'FW_VERSION\s+"\K[^"]+' "$CFG_SRC" || true)
-          echo "FW_VERSION em $CFG_SRC: $FW_VERSION"
-          if [ "$TAG_VERSION" != "$FW_VERSION" ]; then
-            echo "::error::Tag ($TAG_VERSION) não corresponde a FW_VERSION ($FW_VERSION) em $CFG_SRC"
+          TAG="${GITHUB_REF#refs/tags/}"
+          VER="${TAG#v}"
+          echo "tag=$TAG"   >> "$GITHUB_OUTPUT"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG -> Version: $VER"
+
+      - name: Validate tag matches FW_VERSION
+        run: |
+          FW=$(grep -E '^\s*#define\s+FW_VERSION' ${{ env.SKETCH_DIR }}/*.ino \
+               | head -1 | awk -F'"' '{print $2}')
+          TAG_VER="${{ steps.tag.outputs.version }}"
+          echo "FW_VERSION in code : $FW"
+          echo "Tag version        : $TAG_VER"
+          if [ "$FW" != "$TAG_VER" ]; then
+            echo "::error::Tag v$TAG_VER does NOT match FW_VERSION $FW"
             exit 1
           fi
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 core (pinned ${{ env.ESP32_CORE_VERSION }})
+      - name: Install ESP32 core ${{ env.CORE_VERSION }}
         run: |
           arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls \
             https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index
-          arduino-cli core install esp32:esp32@${{ env.ESP32_CORE_VERSION }}
+          arduino-cli core install esp32:esp32@${{ env.CORE_VERSION }}
 
-      - name: Verify ci/libraries.txt exists
+      - name: Install libraries
         run: |
-          if [ ! -f ci/libraries.txt ]; then
-            echo "::error file=ci/libraries.txt::Arquivo ci/libraries.txt não encontrado."
-            exit 1
-          fi
-          cat ci/libraries.txt
-
-      - name: Install libraries from ci/libraries.txt
-        run: |
-          while IFS= read -r lib || [ -n "$lib" ]; do
-            trimmed="$(echo "$lib" | tr -d '[:space:]')"
-            [ -z "$trimmed" ] && continue
-            case "$trimmed" in \#*) continue ;; esac
-            echo "==> Installing: $trimmed"
-            arduino-cli lib install "$trimmed"
+          while IFS= read -r line || [ -n "$line" ]; do
+            [[ -z "$line" || "$line" =~ ^# ]] && continue
+            arduino-cli lib install "$line"
           done < ci/libraries.txt
-          arduino-cli lib list
 
-      - name: Stage config.h from example (if missing)
-        run: |
-          if [ ! -f src/rs50_thermal/config.h ]; then
-            cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
-            echo "config.h criado a partir do example"
-          else
-            echo "config.h já existe, mantendo"
-          fi
+      - name: Generate config.h from template
+        run: cp ${{ env.SKETCH_DIR }}/config.h.example ${{ env.SKETCH_DIR }}/config.h
 
       - name: Compile firmware
         run: |
           mkdir -p release
           arduino-cli compile \
             --fqbn "${{ env.FQBN }}" \
-            --output-dir ./release/rs50_thermal \
-            src/rs50_thermal
+            --build-path release \
+            --export-binaries \
+            ${{ env.SKETCH_DIR }}
 
-      - name: Locate and rename artifacts
+      - name: Locate and rename binaries
         id: artifacts
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          APP=$(find ./release -name "*.ino.bin" | head -1)
-          BOOT=$(find ./release -name "*.bootloader.bin" | head -1)
-          PART=$(find ./release -name "*.partitions.bin" | head -1)
+          VER="${{ steps.tag.outputs.version }}"
+          APP=$(find release -name "*.ino.bin" ! -name "*bootloader*" ! -name "*partitions*" | head -1)
+          BOOT=$(find release -name "*.bootloader.bin" -o -name "*_bootloader.bin" | head -1)
+          PART=$(find release -name "*.partitions.bin" -o -name "*_partitions.bin" | head -1)
 
-          for f in "$APP" "$BOOT" "$PART"; do
-            if [ -z "$f" ] || [ ! -f "$f" ]; then
-              echo "::error::Artefato ausente após compilação (APP/BOOT/PART)"
-              ls -lhR ./release || true
-              exit 1
-            fi
-          done
+          if [ -z "$APP" ];  then echo "::error::app bin not found";        exit 1; fi
+          if [ -z "$BOOT" ]; then echo "::error::bootloader bin not found"; exit 1; fi
+          if [ -z "$PART" ]; then echo "::error::partitions bin not found"; exit 1; fi
 
-          cp "$APP"  "./release/rs50_thermal_v${VERSION}.bin"
-          cp "$BOOT" "./release/rs50_thermal_v${VERSION}_bootloader.bin"
-          cp "$PART" "./release/rs50_thermal_v${VERSION}_partitions.bin"
+          mkdir -p dist
+          cp "$APP"  "dist/rs50_thermal_v${VER}.bin"
+          cp "$BOOT" "dist/rs50_thermal_v${VER}_bootloader.bin"
+          cp "$PART" "dist/rs50_thermal_v${VER}_partitions.bin"
 
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          ls -lh ./release/*.bin
+          ls -lh dist/
+          echo "app_size=$(stat -c%s "$APP")" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VER="${{ steps.tag.outputs.version }}"
+          cat > release_notes.md <<EOF
+          ## RS50 Thermal Controller — v${VER}
+
+          ### 📦 Artifacts
+          | Arquivo | Endereço de gravação | Descrição |
+          |---|---|---|
+          | \`rs50_thermal_v${VER}.bin\`              | \`0x10000\` | Aplicação principal |
+          | \`rs50_thermal_v${VER}_bootloader.bin\`   | \`0x0000\`  | Bootloader (apenas recovery) |
+          | \`rs50_thermal_v${VER}_partitions.bin\`   | \`0x8000\`  | Tabela de partições (apenas recovery) |
+
+          ### 🔧 3 modos de gravação
+
+          **1. Atualização normal (só app):**
+          \`\`\`bash
+          esptool.py --chip esp32s3 --port COMx write_flash 0x10000 rs50_thermal_v${VER}.bin
+          \`\`\`
+
+          **2. Flash completo (recovery):**
+          \`\`\`bash
+          esptool.py --chip esp32s3 --port COMx write_flash \\
+            0x0     rs50_thermal_v${VER}_bootloader.bin \\
+            0x8000  rs50_thermal_v${VER}_partitions.bin \\
+            0x10000 rs50_thermal_v${VER}.bin
+          \`\`\`
+
+          **3. OTA (recomendado para dispositivo já em campo):**
+          \`\`\`powershell
+          .\\tools\\flash_ota.ps1 -Bin rs50_thermal_v${VER}.bin
+          \`\`\`
+
+          ### ℹ️ Build info
+          - Core: \`esp32:esp32@${{ env.CORE_VERSION }}\`
+          - FQBN: \`${{ env.FQBN }}\`
+          - App size: ${{ steps.artifacts.outputs.app_size }} bytes
+
+          Veja [CHANGELOG.md](./CHANGELOG.md) para detalhes.
+          EOF
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: RS50 Thermal Controller ${{ steps.tag.outputs.tag }}
+          body_path: release_notes.md
           files: |
-            release/rs50_thermal_v${{ steps.artifacts.outputs.version }}.bin
-            release/rs50_thermal_v${{ steps.artifacts.outputs.version }}_bootloader.bin
-            release/rs50_thermal_v${{ steps.artifacts.outputs.version }}_partitions.bin
-          body: |
-            ## RS50 Thermal Controller — v${{ steps.artifacts.outputs.version }}
-
-            ### Modos de gravação
-            - **Atualização** (só app): grave `rs50_thermal_v${{ steps.artifacts.outputs.version }}.bin` em `0x10000`
-            - **Flash completo** (recovery): grave os 3 binários
-              - `bootloader.bin` → `0x0`
-              - `partitions.bin` → `0x8000`
-              - `*.bin` (app)    → `0x10000`
-            - **Web Flasher**: arraste os 3 `.bin` na ferramenta web
-
-            ### Build info
-            - ESP32 Arduino Core: `2.0.14`
-            - FQBN: `esp32:esp32:esp32s3` (PSRAM disabled, 4MB flash, partition default)
-
-            Ver `CHANGELOG.md` para detalhes desta versão.
+            dist/rs50_thermal_v${{ steps.tag.outputs.version }}.bin
+            dist/rs50_thermal_v${{ steps.tag.outputs.version }}_bootloader.bin
+            dist/rs50_thermal_v${{ steps.tag.outputs.version }}_partitions.bin
+          draft: false
+          prerelease: false

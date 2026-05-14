@@ -3,6 +3,29 @@
 Todas as mudanças relevantes deste projeto são documentadas aqui.
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) · SemVer.
 
+## [3.3.13] - 2026-05-14
+
+### Fixed
+- 🚨 **Build CI quebrado**: `UDP_HOST` referenciado em `rs50_thermal.ino`
+  (linha 184) não estava definido em `config.h.example`. Como o workflow
+  gera o `config.h` por cópia direta do `.example`, o build falhava com
+  `'UDP_HOST' was not declared in this scope`.
+- Adicionadas as macros `UDP_HOST` e `UDP_PORT` ao `config.h.example`
+  com valores padrão de broadcast (`255.255.255.255:33333`).
+
+### Changed
+- `FW_VERSION` bumpado de `3.3.12` → `3.3.13`.
+- Header do `.ino` atualizado para refletir nova versão (validado pelo
+  pre-commit hook).
+
+### Lessons learned
+- **#14**: O CI **não substitui macros** ao gerar `config.h` a partir do
+  `.example` — é cópia literal. Todo símbolo usado no firmware **precisa**
+  existir no `.example` com um valor default seguro/público. Validar com:
+  ```powershell
+  Select-String -Path src\rs50_thermal\*.ino -Pattern "^\s*[A-Z_]+\(?" |
+    Select-Object -ExpandProperty Matches
+
 ## [3.3.12] - 2026-05-13
 
 ### Added
