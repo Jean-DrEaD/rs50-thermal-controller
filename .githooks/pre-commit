@@ -6,33 +6,91 @@ set -e
 SKETCH_DIR="src/rs50_thermal"
 INO="$SKETCH_DIR/rs50_thermal.ino"
 CFG="$SKETCH_DIR/config.h"
+EXAMPLE="$SKETCH_DIR/config.h.example"
 
-# 1. FW_VERSION format
+# ───────────────────────────────────────────────────────────────
+# 1. FW_VERSION deve estar em formato 3.3.x
+# ───────────────────────────────────────────────────────────────
 FW=$(grep -E '^\s*#define\s+FW_VERSION' "$INO" | head -1 | awk -F'"' '{print $2}')
+if [ -z "$FW" ]; then
+  # fallback: procurar no config.h se não achou no .ino
+  if [ -f "$CFG" ]; then
+    FW=$(grep -E '^\s*#define\s+FW_VERSION' "$CFG" | head -1 | awk -F'"' '{print $2}')
+  fi
+fi
 if [[ ! "$FW" =~ ^3\.3\.[0-9]+$ ]]; then
   echo "❌ FW_VERSION '$FW' does not match 3.3.x" >&2
   exit 1
 fi
 
-# 2. Header version matches FW_VERSION
+# ───────────────────────────────────────────────────────────────
+# 2. Header do .ino deve bater com FW_VERSION
+# ───────────────────────────────────────────────────────────────
 HDR=$(grep -E '^\s*\*\s*Version' "$INO" | head -1 | grep -oE '3\.3\.[0-9]+' || true)
 if [ -n "$HDR" ] && [ "$HDR" != "$FW" ]; then
   echo "❌ Header version ($HDR) != FW_VERSION ($FW)" >&2
   exit 1
 fi
 
-# 3. config.h NOT staged (must stay local / gitignored)
+# ───────────────────────────────────────────────────────────────
+# 3. config.h NUNCA pode ser commitado (gitignored, template é o .example)
+# ───────────────────────────────────────────────────────────────
 if git diff --cached --name-only | grep -qE "^${CFG}$"; then
   echo "❌ $CFG must NOT be committed — use config.h.example" >&2
   exit 1
 fi
 
-# 4. Tabs / trailing whitespace warning
-if grep -rnP '\t' "$SKETCH_DIR" 2>/dev/null; then
-  echo "⚠️  Hard tabs found (warning only)"
+# ───────────────────────────────────────────────────────────────
+# 4. config.h.example deve existir e conter todos os macros usados
+#    (Lição #14 — CI não substitui macros no .example)
+# ───────────────────────────────────────────────────────────────
+if [ ! -f "$EXAMPLE" ]; then
+  echo "❌ $EXAMPLE missing — public template is required" >&2
+  exit 1
 fi
-if grep -rn ' $' "$SKETCH_DIR" 2>/dev/null; then
-  echo "⚠️  Trailing whitespace found (warning only)"
+
+REQUIRED_MACROS=(
+  FW_VERSION
+  PIN_NTC PIN_RELAY PIN_PWM PIN_WS2812
+  LED_COUNT
+  TEMP_IDLE TEMP_WARMING TEMP_WARNING TEMP_CRITICAL TEMP_RESTART
+  THERMAL_HYSTERESIS PWM_MIN PWM_CHANNEL_FAN
+  WIFI_SSID WIFI_PASS
+  UDP_HOST UDP_PORT
+)
+MISSING=()
+for M in "${REQUIRED_MACROS[@]}"; do
+  if ! grep -qE "^\s*#define\s+${M}\b" "$EXAMPLE"; then
+    MISSING+=("$M")
+  fi
+done
+if [ ${#MISSING[@]} -gt 0 ]; then
+  echo "❌ $EXAMPLE missing macros: ${MISSING[*]}" >&2
+  echo "   (every macro used by firmware must exist in the .example with a safe default)" >&2
+  exit 1
+fi
+
+# ───────────────────────────────────────────────────────────────
+# 5. Banner automatizado: README NÃO deve ter banner hard-coded vX.Y.Z
+#    deixe o workflow banner-bump.yml fazer o trabalho
+# ───────────────────────────────────────────────────────────────
+if [ -f "README.md" ]; then
+  if git diff --cached --name-only | grep -qE '^README\.md$'; then
+    # checa se alguém editou manualmente o cache-buster do banner
+    if git diff --cached README.md 2>/dev/null | grep -qE '^\+.*banner\.svg\?v='; then
+  echo "⚠️  README banner cache-buster alterado — banner-bump.yml deveria fazer isso."
+fi
+  fi
+fi
+
+# ───────────────────────────────────────────────────────────────
+# 6. Avisos (não bloqueiam): tabs e trailing whitespace
+# ───────────────────────────────────────────────────────────────
+if grep -rnP '\t' "$SKETCH_DIR" 2>/dev/null >/dev/null; then
+  echo "⚠️  Hard tabs found in $SKETCH_DIR (warning only)"
+fi
+if grep -rn ' $' "$SKETCH_DIR" 2>/dev/null >/dev/null; then
+  echo "⚠️  Trailing whitespace found in $SKETCH_DIR (warning only)"
 fi
 
 echo "✅ pre-commit OK (FW_VERSION=$FW)"

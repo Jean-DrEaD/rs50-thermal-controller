@@ -35,6 +35,7 @@ src/rs50_thermal/config.h
 # ─── Scripts e arquivos locais (não versionar) ───────────────────────────────
 # PowerShell (setup-repo.ps1, update-repo.ps1, etc.)
 *.ps1
+!tools/ota_flash.ps1
 # Arquivos de mensagem de commit temporários (git commit -F)
 commit_msg*.txt
 tag_msg*.txt
