@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.svg" alt="RS50 Thermal Controller" width="100%">
+  <img src="docs/banner.svg?v=3.3.13" alt="RS50 Thermal Controller" width="100%">
 </p>
 
 <p align="center">
