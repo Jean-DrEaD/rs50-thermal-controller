@@ -57,6 +57,15 @@ jobs:
           done < ci/libraries.txt
           arduino-cli lib list
 
+      - name: Stage config.h from example (CI build)
+        run: |
+          if [ ! -f src/rs50_thermal/config.h ]; then
+            cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
+            echo "✅ config.h criado a partir do example (valores placeholder)"
+          else
+            echo "config.h já existe, mantendo"
+          fi
+
       - name: Compile sketch (ESP32-S3-Zero, no PSRAM)
         run: |
           arduino-cli compile \
@@ -95,6 +104,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Stage config.h from example (for lint checks)
+        run: |
+          if [ ! -f src/rs50_thermal/config.h ]; then
+            cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
+            echo "✅ config.h criado a partir do example para checagens de lint"
+          fi
 
       - name: Check for tabs (require spaces)
         run: |
