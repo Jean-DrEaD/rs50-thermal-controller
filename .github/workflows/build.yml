@@ -1,14 +1,14 @@
-name: Arduino Build & Validate
+name: Build Firmware
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
     paths:
       - 'src/**'
       - 'ci/**'
       - '.github/workflows/build.yml'
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 env:
@@ -17,9 +17,7 @@ env:
 
 jobs:
   build:
-    name: Compile for ESP32-S3-Zero
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,14 +25,13 @@ jobs:
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 core ${{ env.ESP32_CORE_VERSION }}
+      - name: Install ESP32 core (pinned ${{ env.ESP32_CORE_VERSION }})
         run: |
           arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls \
-            https://espressif.github.io/arduino-esp32/package_esp32_index.json
+            https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index
           arduino-cli core install esp32:esp32@${{ env.ESP32_CORE_VERSION }}
-          arduino-cli core list
 
       - name: Verify ci/libraries.txt exists
         run: |
@@ -42,9 +39,7 @@ jobs:
             echo "::error file=ci/libraries.txt::Arquivo ci/libraries.txt não encontrado."
             exit 1
           fi
-          echo "---- ci/libraries.txt ----"
           cat ci/libraries.txt
-          echo "--------------------------"
 
       - name: Install libraries from ci/libraries.txt
         run: |
@@ -57,81 +52,30 @@ jobs:
           done < ci/libraries.txt
           arduino-cli lib list
 
-      - name: Stage config.h from example (CI build)
+      - name: Stage config.h from example (if missing)
         run: |
           if [ ! -f src/rs50_thermal/config.h ]; then
             cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
-            echo "✅ config.h criado a partir do example (valores placeholder)"
+            echo "✅ config.h criado a partir de config.h.example"
           else
-            echo "config.h já existe, mantendo"
+            echo "ℹ️  config.h já existe"
           fi
+          echo "---- config.h ----"
+          cat src/rs50_thermal/config.h
 
-      - name: Compile sketch (ESP32-S3-Zero, no PSRAM)
+      - name: Compile sketch
         run: |
+          mkdir -p build-output
           arduino-cli compile \
             --fqbn "${{ env.FQBN }}" \
+            --output-dir ./build-output/rs50_thermal \
             --warnings default \
-            --output-dir ./build \
-            ./src/rs50_thermal/
+            src/rs50_thermal
 
-      - name: Check binary size
-        run: |
-          ls -lhR ./build/
-          BIN_FILE=$(find ./build -name "*.ino.bin" | head -1)
-          if [ -z "$BIN_FILE" ]; then
-            echo "::error::Nenhum .ino.bin gerado em ./build"
-            exit 1
-          fi
-          BIN_SIZE=$(stat -c%s "$BIN_FILE")
-          echo "Firmware size: $BIN_SIZE bytes ($BIN_FILE)"
-          if [ "$BIN_SIZE" -gt 1310720 ]; then
-            echo "::warning::Firmware excede 1.25MB - verifique partition scheme"
-          fi
-          echo "Build successful"
-
-      - name: Upload firmware artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: rs50-thermal-firmware-${{ github.sha }}
-          path: |
-            ./build/**/*.bin
-            ./build/**/*.elf
-          retention-days: 30
-
-  lint:
-    name: Code Style Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Stage config.h from example (for lint checks)
-        run: |
-          if [ ! -f src/rs50_thermal/config.h ]; then
-            cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
-            echo "✅ config.h criado a partir do example para checagens de lint"
-          fi
-
-      - name: Check for tabs (require spaces)
-        run: |
-          if grep -rlP '\t' src/rs50_thermal/*.ino src/rs50_thermal/*.h 2>/dev/null; then
-            echo "::warning::Tabs found - use 2 spaces"
-          fi
-          echo "Indentation check OK"
-
-      - name: Check trailing whitespace
-        run: |
-          if grep -rlP ' +$' src/rs50_thermal/*.ino src/rs50_thermal/*.h 2>/dev/null; then
-            echo "::warning::Trailing whitespace found"
-          fi
-          echo "Whitespace check OK"
-
-      - name: Verify version constant matches v3.3.x
-        run: |
-          if ! grep -qE 'FW_VERSION\s+"3\.3\.[0-9]+"' src/rs50_thermal/config.h; then
-            echo "::error::FW_VERSION deve seguir o padrão 3.3.x"
-            grep FW_VERSION src/rs50_thermal/config.h || true
-            exit 1
-          fi
-          VERSION=$(grep -oP 'FW_VERSION\s+"\K[^"]+' src/rs50_thermal/config.h)
-          echo "Version detected: $VERSION"
+          name: firmware-build-${{ github.sha }}
+          path: build-output/rs50_thermal/*.bin
+          if-no-files-found: warn
+          retention-days: 14

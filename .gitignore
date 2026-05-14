@@ -42,8 +42,9 @@ scratch*.txt
 
 # ─── Pastas locais de trabalho ───────────────────────────────────────────────
 .backup/
-# Pasta ci/ — bibliotecas do CI agora inlineadas diretamente nos workflows
-ci/
+# Pasta ci/ — mantém libraries.txt versionado para o workflow
+ci/*
+!ci/libraries.txt
 # Scripts auxiliares locais
 scripts/
 
