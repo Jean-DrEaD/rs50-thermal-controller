@@ -5,10 +5,15 @@ on:
     branches: [ main, develop ]
     paths:
       - 'src/**'
+      - 'ci/**'
       - '.github/workflows/build.yml'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+
+env:
+  ESP32_CORE_VERSION: "2.0.14"
+  FQBN: "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none"
 
 jobs:
   build:
@@ -22,24 +27,40 @@ jobs:
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 core 2.0.14
+      - name: Install ESP32 core ${{ env.ESP32_CORE_VERSION }}
         run: |
           arduino-cli config init --overwrite
-          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli config add board_manager.additional_urls \
+            https://espressif.github.io/arduino-esp32/package_esp32_index.json
           arduino-cli core update-index
-          arduino-cli core install esp32:esp32@2.0.14
+          arduino-cli core install esp32:esp32@${{ env.ESP32_CORE_VERSION }}
           arduino-cli core list
 
-      - name: Install libraries (matching local dev environment)
+      - name: Verify ci/libraries.txt exists
         run: |
-          arduino-cli lib install "FastLED@3.6.0"
-          arduino-cli lib install "WebSockets@2.4.1"
+          if [ ! -f ci/libraries.txt ]; then
+            echo "::error file=ci/libraries.txt::Arquivo ci/libraries.txt não encontrado."
+            exit 1
+          fi
+          echo "---- ci/libraries.txt ----"
+          cat ci/libraries.txt
+          echo "--------------------------"
+
+      - name: Install libraries from ci/libraries.txt
+        run: |
+          while IFS= read -r lib || [ -n "$lib" ]; do
+            trimmed="$(echo "$lib" | tr -d '[:space:]')"
+            [ -z "$trimmed" ] && continue
+            case "$trimmed" in \#*) continue ;; esac
+            echo "==> Installing: $trimmed"
+            arduino-cli lib install "$trimmed"
+          done < ci/libraries.txt
           arduino-cli lib list
 
       - name: Compile sketch (ESP32-S3-Zero, no PSRAM)
         run: |
           arduino-cli compile \
-            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none" \
+            --fqbn "${{ env.FQBN }}" \
             --warnings default \
             --output-dir ./build \
             ./src/rs50_thermal/
@@ -47,13 +68,15 @@ jobs:
       - name: Check binary size
         run: |
           ls -lhR ./build/
-          BIN_FILE=$(find ./build -name "*.bin" | head -1)
-          if [ -n "$BIN_FILE" ]; then
-            BIN_SIZE=$(stat -c%s "$BIN_FILE")
-            echo "Firmware size: $BIN_SIZE bytes ($BIN_FILE)"
-            if [ "$BIN_SIZE" -gt 1310720 ]; then
-              echo "::warning::Firmware exceeds 1.25MB - check partition scheme"
-            fi
+          BIN_FILE=$(find ./build -name "*.ino.bin" | head -1)
+          if [ -z "$BIN_FILE" ]; then
+            echo "::error::Nenhum .ino.bin gerado em ./build"
+            exit 1
+          fi
+          BIN_SIZE=$(stat -c%s "$BIN_FILE")
+          echo "Firmware size: $BIN_SIZE bytes ($BIN_FILE)"
+          if [ "$BIN_SIZE" -gt 1310720 ]; then
+            echo "::warning::Firmware excede 1.25MB - verifique partition scheme"
           fi
           echo "Build successful"
 
@@ -90,7 +113,7 @@ jobs:
       - name: Verify version constant matches v3.3.x
         run: |
           if ! grep -qE 'FW_VERSION\s+"3\.3\.[0-9]+"' src/rs50_thermal/config.h; then
-            echo "FW_VERSION must match pattern 3.3.x"
+            echo "::error::FW_VERSION deve seguir o padrão 3.3.x"
             grep FW_VERSION src/rs50_thermal/config.h || true
             exit 1
           fi

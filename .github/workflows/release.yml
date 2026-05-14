@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+  ESP32_CORE_VERSION: "2.0.14"
+  FQBN: "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none"
+
 jobs:
   build-release:
     runs-on: ubuntu-latest
@@ -12,35 +16,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate tag matches FW_VERSION in config.h
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          echo "Tag version: $TAG_VERSION"
+          if [ -f src/rs50_thermal/config.h ]; then
+            CFG_SRC="src/rs50_thermal/config.h"
+          else
+            CFG_SRC="src/rs50_thermal/config.h.example"
+          fi
+          FW_VERSION=$(grep -oP 'FW_VERSION\s+"\K[^"]+' "$CFG_SRC" || true)
+          echo "FW_VERSION em $CFG_SRC: $FW_VERSION"
+          if [ "$TAG_VERSION" != "$FW_VERSION" ]; then
+            echo "::error::Tag ($TAG_VERSION) não corresponde a FW_VERSION ($FW_VERSION) em $CFG_SRC"
+            exit 1
+          fi
+
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 core (pinned 2.0.14)
+      - name: Install ESP32 core (pinned ${{ env.ESP32_CORE_VERSION }})
         run: |
           arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls \
             https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index
-          arduino-cli core install esp32:esp32@2.0.14
+          arduino-cli core install esp32:esp32@${{ env.ESP32_CORE_VERSION }}
+
+      - name: Verify ci/libraries.txt exists
+        run: |
+          if [ ! -f ci/libraries.txt ]; then
+            echo "::error file=ci/libraries.txt::Arquivo ci/libraries.txt não encontrado."
+            exit 1
+          fi
+          cat ci/libraries.txt
 
       - name: Install libraries from ci/libraries.txt
         run: |
           while IFS= read -r lib || [ -n "$lib" ]; do
-            [ -z "$lib" ] && continue
-            case "$lib" in \#*) continue ;; esac
-            echo "Installing: $lib"
-            arduino-cli lib install "$lib"
+            trimmed="$(echo "$lib" | tr -d '[:space:]')"
+            [ -z "$trimmed" ] && continue
+            case "$trimmed" in \#*) continue ;; esac
+            echo "==> Installing: $trimmed"
+            arduino-cli lib install "$trimmed"
           done < ci/libraries.txt
+          arduino-cli lib list
 
-      - name: Stage config.h from example
+      - name: Stage config.h from example (if missing)
         run: |
-          cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
+          if [ ! -f src/rs50_thermal/config.h ]; then
+            cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
+            echo "config.h criado a partir do example"
+          else
+            echo "config.h já existe, mantendo"
+          fi
 
       - name: Compile firmware
         run: |
           mkdir -p release
           arduino-cli compile \
-            --fqbn "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled" \
+            --fqbn "${{ env.FQBN }}" \
             --output-dir ./release/rs50_thermal \
             src/rs50_thermal
 
@@ -52,11 +87,20 @@ jobs:
           BOOT=$(find ./release -name "*.bootloader.bin" | head -1)
           PART=$(find ./release -name "*.partitions.bin" | head -1)
 
+          for f in "$APP" "$BOOT" "$PART"; do
+            if [ -z "$f" ] || [ ! -f "$f" ]; then
+              echo "::error::Artefato ausente após compilação (APP/BOOT/PART)"
+              ls -lhR ./release || true
+              exit 1
+            fi
+          done
+
           cp "$APP"  "./release/rs50_thermal_v${VERSION}.bin"
           cp "$BOOT" "./release/rs50_thermal_v${VERSION}_bootloader.bin"
           cp "$PART" "./release/rs50_thermal_v${VERSION}_partitions.bin"
 
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          ls -lh ./release/*.bin
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -75,5 +119,9 @@ jobs:
               - `partitions.bin` → `0x8000`
               - `*.bin` (app)    → `0x10000`
             - **Web Flasher**: arraste os 3 `.bin` na ferramenta web
+
+            ### Build info
+            - ESP32 Arduino Core: `2.0.14`
+            - FQBN: `esp32:esp32:esp32s3` (PSRAM disabled, 4MB flash, partition default)
 
             Ver `CHANGELOG.md` para detalhes desta versão.
