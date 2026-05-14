@@ -1,4 +1,4 @@
-# Bibliotecas externas do projeto RS50 Thermal Controller
-# Formato: Nome@versão (uma por linha). Linhas iniciadas com '#' são comentários.
+# RS50 Thermal Controller — pinned dependencies
+# Format: Name@version (one per line)
 FastLED@3.6.0
 WebSockets@2.4.1

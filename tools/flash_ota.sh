@@ -1,42 +1,23 @@
 #!/usr/bin/env bash
-# ============================================================================
-#  RS50 Thermal — OTA Flash Script
-#  Usage: ./tools/flash_ota.sh [host] [firmware.bin]
-#  Defaults: host=rs50-thermal.local  bin=build/rs50_thermal.ino.bin
-# ============================================================================
+# RS50 Thermal Controller - OTA Flash (Linux/macOS)
 set -euo pipefail
 
-HOST="${1:-rs50-thermal.local}"
-BIN="${2:-build/rs50_thermal.ino.bin}"
-PORT="${OTA_PORT:-3232}"
-PASS="${OTA_PASS:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+BUILD_DIR="${PROJECT_ROOT}/.pio/build"
+DEFAULT_ENV="esp32dev"
 
-# Localiza espota.py do core arduino-esp32 (Linux/macOS/WSL)
-ESPOTA="$(find "${HOME}/.arduino15" "${HOME}/Library/Arduino15" \
-              -name espota.py 2>/dev/null | head -n1 || true)"
+ENV="${1:-${DEFAULT_ENV}}"
+HOST="${2:-rs50.local}"
+FIRMWARE="${BUILD_DIR}/${ENV}/firmware.bin"
 
-if [[ -z "${ESPOTA}" ]]; then
-  echo "❌ espota.py não encontrado. Instale o core esp32 via arduino-cli."
+if [[ ! -f "${FIRMWARE}" ]]; then
+  echo "❌ Firmware não encontrado: ${FIRMWARE}"
+  echo "   Rode: pio run -e ${ENV}"
   exit 1
 fi
 
-if [[ ! -f "${BIN}" ]]; then
-  echo "❌ Binário não encontrado: ${BIN}"
-  echo "   Compile antes com: arduino-cli compile --output-dir build ..."
-  exit 1
-fi
-
-echo "🔍 Verificando host ${HOST}..."
-if ! ping -c1 -W2 "${HOST}" >/dev/null 2>&1; then
-  echo "⚠️  ${HOST} não responde a ping (mDNS pode estar ok mesmo assim)"
-fi
-
-echo "📤 Enviando ${BIN} → ${HOST}:${PORT}"
-python3 "${ESPOTA}" \
-  -i "${HOST}" \
-  -p "${PORT}" \
-  ${PASS:+-a "${PASS}"} \
-  -f "${BIN}" \
-  -r
-
-echo "✅ OTA concluído."
+echo "📡 Enviando ${FIRMWARE} para http://${HOST}/update"
+curl -sS -F "firmware=@${FIRMWARE}" "http://${HOST}/update" \
+  && echo "✅ OTA concluído" \
+  || { echo "❌ Falha no OTA"; exit 2; }

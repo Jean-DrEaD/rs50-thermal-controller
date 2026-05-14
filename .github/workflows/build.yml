@@ -1,81 +1,142 @@
-name: Build Firmware
+name: Arduino Build & Validate
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, develop]
     paths:
       - 'src/**'
       - 'ci/**'
       - '.github/workflows/build.yml'
   pull_request:
-    branches: [ main, master ]
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'ci/**'
   workflow_dispatch:
 
 env:
-  ESP32_CORE_VERSION: "2.0.14"
-  FQBN: "esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled,LoopCore=1,EventsCore=1,DebugLevel=none"
+  FQBN: esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,FlashMode=qio,FlashSize=4M,PartitionScheme=default,PSRAM=disabled
+  SKETCH_DIR: src/rs50_thermal
+  CORE_VERSION: 2.0.14
+  MAX_BIN_SIZE: 1310720  # 1.25 MB warning threshold
 
 jobs:
-  build:
+  lint:
+    name: Lint (whitespace + FW_VERSION)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Check trailing whitespace / tabs
+        run: |
+          set +e
+          echo "::group::Trailing whitespace"
+          grep -rn ' $' ${{ env.SKETCH_DIR }} || echo "OK"
+          echo "::endgroup::"
+          echo "::group::Hard tabs"
+          grep -rnP '\t' ${{ env.SKETCH_DIR }} || echo "OK"
+          echo "::endgroup::"
+
+      - name: Validate FW_VERSION pattern (3.3.x)
+        run: |
+          VER=$(grep -E '^\s*#define\s+FW_VERSION' ${{ env.SKETCH_DIR }}/*.ino \
+                | head -1 | awk -F'"' '{print $2}')
+          echo "Detected FW_VERSION: $VER"
+          if [[ ! "$VER" =~ ^3\.3\.[0-9]+$ ]]; then
+            echo "::error::FW_VERSION '$VER' does not match 3.3.x"
+            exit 1
+          fi
+
+      - name: Validate every macro used in .ino exists in config.h.example
+        run: |
+          MISSING=0
+          # extract ALL_CAPS identifiers from .ino (rough heuristic)
+          USED=$(grep -hoE '\b[A-Z][A-Z0-9_]{2,}\b' ${{ env.SKETCH_DIR }}/*.ino \
+                 | sort -u)
+          for m in $USED; do
+            # skip C/Arduino built-ins
+            case "$m" in
+              HIGH|LOW|INPUT|OUTPUT|OUTPUT_OPEN_DRAIN|INPUT_PULLUP|INPUT_PULLDOWN) continue;;
+              LED_BUILTIN|WIFI_STA|WL_CONNECTED) continue;;
+              GRB|RGB|WS2812|CRGB) continue;;
+              F|PSTR|PROGMEM) continue;;
+              IDLE|WARMING|WARNING|CRITICAL) continue;;
+              FW_VERSION) continue;;
+            esac
+            # check if defined in any header
+            if ! grep -qE "^\s*#define\s+$m\b|^\s*#ifndef\s+$m\b" \
+                 ${{ env.SKETCH_DIR }}/config.h.example \
+                 ${{ env.SKETCH_DIR }}/dashboard.h 2>/dev/null; then
+              # might be a local enum/var — only warn if it looks like a config macro
+              if grep -qE "\b$m\b" ${{ env.SKETCH_DIR }}/config.h.example; then
+                continue
+              fi
+              echo "::warning::Symbol '$m' used in .ino but not found in config.h.example"
+            fi
+          done
+
+  build:
+    name: Compile firmware
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v2
 
-      - name: Install ESP32 core (pinned ${{ env.ESP32_CORE_VERSION }})
+      - name: Install ESP32 core ${{ env.CORE_VERSION }}
         run: |
           arduino-cli config init --overwrite
           arduino-cli config add board_manager.additional_urls \
             https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index
-          arduino-cli core install esp32:esp32@${{ env.ESP32_CORE_VERSION }}
-
-      - name: Verify ci/libraries.txt exists
-        run: |
-          if [ ! -f ci/libraries.txt ]; then
-            echo "::error file=ci/libraries.txt::Arquivo ci/libraries.txt não encontrado."
-            exit 1
-          fi
-          cat ci/libraries.txt
+          arduino-cli core install esp32:esp32@${{ env.CORE_VERSION }}
 
       - name: Install libraries from ci/libraries.txt
         run: |
-          while IFS= read -r lib || [ -n "$lib" ]; do
-            trimmed="$(echo "$lib" | tr -d '[:space:]')"
-            [ -z "$trimmed" ] && continue
-            case "$trimmed" in \#*) continue ;; esac
-            echo "==> Installing: $trimmed"
-            arduino-cli lib install "$trimmed"
-          done < ci/libraries.txt
-          arduino-cli lib list
-
-      - name: Stage config.h from example (if missing)
-        run: |
-          if [ ! -f src/rs50_thermal/config.h ]; then
-            cp src/rs50_thermal/config.h.example src/rs50_thermal/config.h
-            echo "✅ config.h criado a partir de config.h.example"
-          else
-            echo "ℹ️  config.h já existe"
+          if [ ! -f ci/libraries.txt ]; then
+            echo "::error::ci/libraries.txt not found"
+            exit 1
           fi
-          echo "---- config.h ----"
-          cat src/rs50_thermal/config.h
+          while IFS= read -r line || [ -n "$line" ]; do
+            # skip comments / blank lines
+            [[ -z "$line" || "$line" =~ ^# ]] && continue
+            echo "Installing: $line"
+            arduino-cli lib install "$line"
+          done < ci/libraries.txt
+
+      - name: Generate config.h from template
+        run: |
+          cp ${{ env.SKETCH_DIR }}/config.h.example ${{ env.SKETCH_DIR }}/config.h
+          echo "::notice::config.h generated from .example (literal copy)"
 
       - name: Compile sketch
         run: |
-          mkdir -p build-output
+          mkdir -p build
           arduino-cli compile \
             --fqbn "${{ env.FQBN }}" \
-            --output-dir ./build-output/rs50_thermal \
-            --warnings default \
-            src/rs50_thermal
+            --build-path build \
+            --warnings more \
+            ${{ env.SKETCH_DIR }}
 
-      - name: Upload build artifacts
+      - name: Check binary size
+        run: |
+          BIN=$(find build -name "*.ino.bin" | head -1)
+          if [ -z "$BIN" ]; then
+            echo "::error::No .ino.bin produced"
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$BIN")
+          echo "App size: $SIZE bytes"
+          if [ "$SIZE" -gt "${{ env.MAX_BIN_SIZE }}" ]; then
+            echo "::warning::Binary $SIZE > ${{ env.MAX_BIN_SIZE }} bytes"
+          fi
+
+      - name: Upload artifact (PR preview)
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-build-${{ github.sha }}
-          path: build-output/rs50_thermal/*.bin
-          if-no-files-found: warn
-          retention-days: 14
+          name: rs50_thermal-pr${{ github.event.pull_request.number }}
+          path: build/*.ino.bin
+          retention-days: 7

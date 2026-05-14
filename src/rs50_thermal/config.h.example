@@ -6,7 +6,7 @@
 // =====================================================
 
 // ---------- Firmware Version ----------
-#define FW_VERSION        "3.3.11"
+#define FW_VERSION        "3.3.13"
 
 // ---------- Wi-Fi ----------
 // ⚠️ NÃO COMMITAR credenciais reais — usar config.h.example como template
@@ -17,6 +17,16 @@
 // ===== OTA / Admin =====
 #define OTA_HOSTNAME    "rs50-thermal"
 #define OTA_PASSWORD    "troque-isto"
+
+// ---------------------------------------------------------------------------
+// Network / Telemetry (UDP broadcast for SimHub)
+// ---------------------------------------------------------------------------
+#ifndef UDP_HOST
+  #define UDP_HOST "255.255.255.255"   // broadcast default (safe public)
+#endif
+#ifndef UDP_PORT
+  #define UDP_PORT 33333
+#endif
 
 // ===== MQTT (reservado — não usado em v3.x) =====
 #define MQTT_HOST       "192.168.1.100"
